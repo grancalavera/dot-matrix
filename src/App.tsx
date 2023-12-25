@@ -1,6 +1,6 @@
 import { Subscribe } from "@react-rxjs/core";
 import clsx from "clsx";
-import { PropsWithChildren, ReactNode, useState } from "react";
+import { PropsWithChildren, ReactNode, useEffect, useState } from "react";
 import "./App.css";
 import { disableDebug, enableDebug, useIsDebugEnabled } from "./debug/state";
 import { GridLayout } from "./layout/GridLayout";
@@ -11,6 +11,8 @@ import {
   toggleSymbolPixel,
   undoSymbolEdits,
   useIsPixelOn,
+  useIsSymbolDraftEmpty,
+  useIsSymbolDraftModified,
   useSaveSymbolMutation,
   useSymbolDraft,
 } from "./symbol/state";
@@ -53,17 +55,40 @@ const SymbolEditor = () => (
 const SymbolEditorToolbar = () => {
   return (
     <Toolbar>
-      <Button onClick={() => undoSymbolEdits()}>undo</Button>
-      <Button onClick={() => clearSymbolDraft()}>clear</Button>
+      <UndoSymbolEditsButton />
+      <ClearSymbolDraftButton />
       <SaveSymbolButton />
     </Toolbar>
+  );
+};
+
+const UndoSymbolEditsButton = () => {
+  const disabled = !useIsSymbolDraftModified();
+  return (
+    <Button onClick={() => undoSymbolEdits()} disabled={disabled}>
+      undo
+    </Button>
+  );
+};
+
+const ClearSymbolDraftButton = () => {
+  const disabled = useIsSymbolDraftEmpty();
+  return (
+    <Button onClick={() => clearSymbolDraft()} disabled={disabled}>
+      clear
+    </Button>
   );
 };
 
 const SaveSymbolButton = () => {
   const { mutate } = useSaveSymbolMutation();
   const draft = useSymbolDraft();
-  return <Button onClick={() => mutate(draft)}>save</Button>;
+  const disabled = !useIsSymbolDraftModified();
+  return (
+    <Button onClick={() => mutate(draft)} disabled={disabled}>
+      save
+    </Button>
+  );
 };
 
 const DebugButton = () => {

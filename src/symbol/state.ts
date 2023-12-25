@@ -1,6 +1,6 @@
 import { bind } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
-import { concat, first, map, merge, scan, startWith, switchMap } from "rxjs";
+import { concat, first, map, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
 import { defaultSymbolDescription, defaultSymbolId, isModified } from "./model";
@@ -18,6 +18,7 @@ export {
   useSaveSymbolMutation,
   useSymbol,
   useSymbolDraft,
+  useIsSymbolDraftEmpty,
 };
 
 const [openSymbol$, editSymbol] = createSignal<string>();
@@ -83,5 +84,11 @@ const [useIsSymbolDraftModified] = bind(
         .symbol$(draft.id)
         .pipe(map((original) => isModified(original.data, draft.data)))
     )
+  )
+);
+
+const [useIsSymbolDraftEmpty] = bind(
+  symbolDraft$.pipe(
+    map((draft) => [...draft.data.values()].every((pixel) => !pixel))
   )
 );
