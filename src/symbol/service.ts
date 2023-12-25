@@ -1,10 +1,24 @@
+import { state } from "@react-rxjs/core";
+import { createSignal } from "@react-rxjs/utils";
+import { concat, defer, filter, map, of } from "rxjs";
 import { SymbolDescription, emptySymbol } from "./model";
 
-export const loadSymbol = (id: string): SymbolDescription => {
+const [invalidate$, invalidate] = createSignal<string>();
+
+export const symbol$ = state((id: string) =>
+  defer(() => {
+    const reload$ = invalidate$.pipe(
+      filter((candidate) => candidate === id),
+      map(() => loadSymbol(id))
+    );
+    return concat(of(loadSymbol(id)), reload$);
+  })
+);
+
+const loadSymbol = (id: string): SymbolDescription => {
   const binaryString = localStorage.getItem(id);
 
   if (binaryString === null) {
-    console.warn(`Symbol "${id}" not found in local storage`);
     return { id, data: emptySymbol() };
   }
 
@@ -16,18 +30,14 @@ export const loadSymbol = (id: string): SymbolDescription => {
   return { id, data };
 };
 
-/**
- * Saves a symbol to local storage
- * Saves a symbol to local storage. In local storate each symbol is stored as a
- * string of 0s and 1s. This function converts the CharSymbol into a string and
- * saves it to local storage.
- * @param id The key to save the symbol under in local storage
- *
- */
-export const saveSymbol = ({ id, data }: SymbolDescription): void => {
+export const saveSymbol = async ({
+  id,
+  data,
+}: SymbolDescription): Promise<void> => {
   let binaryString = "";
   for (let i = 0; i < data.size; i++) {
     binaryString += data.get(i) ? "1" : "0";
   }
   localStorage.setItem(id, binaryString);
+  invalidate(id);
 };
