@@ -30,3 +30,15 @@ export const defaultSymbolDescription = (
   id,
   data: emptySymbol(),
 });
+
+export const isModified = (
+  original: SymbolData,
+  draft: SymbolData
+): boolean => {
+  for (let i = 0; i < symbolSize; i++) {
+    if (original.get(i) !== draft.get(i)) {
+      return true;
+    }
+  }
+  return false;
+};

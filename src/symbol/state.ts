@@ -1,20 +1,18 @@
-import { bind, state } from "@react-rxjs/core";
+import { bind } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
-import { Observable, map, scan, startWith, switchMap } from "rxjs";
+import { concat, first, map, merge, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
-import {
-  SymbolDescription,
-  defaultSymbolDescription,
-  defaultSymbolId,
-} from "./model";
+import { defaultSymbolDescription, defaultSymbolId, isModified } from "./model";
 import * as service from "./service";
 
 export {
   clearSymbolDraft,
   editSymbol,
   toggleSymbolPixel,
+  undoSymbolEdits,
   useIsSymbolDraftPixelOn as useIsPixelOn,
+  useIsSymbolDraftModified,
   useIsSymbolPixelOn,
   useIsSymbolSelected,
   useSaveSymbolMutation,
@@ -25,16 +23,20 @@ export {
 const [openSymbol$, editSymbol] = createSignal<string>();
 const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
 const [clear$, clearSymbolDraft] = createSignal();
+const [undo$, undoSymbolEdits] = createSignal();
 
 const [useSymbol] = bind(service.symbol$);
 
-const symbolDraft$: Observable<SymbolDescription> = state(
+const [useSymbolDraft, symbolDraft$] = bind(
   mergeWithKey({
     togglePixel$,
     clear$,
     symbol$: openSymbol$.pipe(
       startWith(defaultSymbolId),
-      switchMap((id) => service.symbol$(id))
+      switchMap((id) => {
+        const read$ = service.symbol$(id).pipe(first());
+        return concat(read$, undo$.pipe(switchMap(() => read$)));
+      })
     ),
   }).pipe(
     scan((draft, signal) => {
@@ -57,8 +59,6 @@ const symbolDraft$: Observable<SymbolDescription> = state(
   )
 );
 
-const [useSymbolDraft] = bind(() => symbolDraft$);
-
 const [useIsSymbolSelected] = bind((id: string) =>
   symbolDraft$.pipe(map((draft) => draft.id === id))
 );
@@ -75,3 +75,13 @@ const [useIsSymbolPixelOn] = bind((id: string, index: number) => {
 });
 
 const useSaveSymbolMutation = () => useMutation(service.saveSymbol);
+
+const [useIsSymbolDraftModified] = bind(
+  symbolDraft$.pipe(
+    switchMap((draft) =>
+      service
+        .symbol$(draft.id)
+        .pipe(map((original) => isModified(original.data, draft.data)))
+    )
+  )
+);

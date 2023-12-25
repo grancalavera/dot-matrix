@@ -1,11 +1,11 @@
-import { state } from "@react-rxjs/core";
 import { createSignal } from "@react-rxjs/utils";
 import { concat, defer, filter, map, of } from "rxjs";
 import { SymbolDescription, emptySymbol } from "./model";
+import memoize from "lodash/memoize";
 
 const [invalidate$, invalidate] = createSignal<string>();
 
-export const symbol$ = state((id: string) =>
+export const symbol$ = memoize((id: string) =>
   defer(() => {
     const reload$ = invalidate$.pipe(
       filter((candidate) => candidate === id),

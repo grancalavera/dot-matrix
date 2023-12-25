@@ -9,6 +9,7 @@ import { symbols } from "./symbol/model";
 import {
   clearSymbolDraft,
   toggleSymbolPixel,
+  undoSymbolEdits,
   useIsPixelOn,
   useSaveSymbolMutation,
   useSymbolDraft,
@@ -52,7 +53,8 @@ const SymbolEditor = () => (
 const SymbolEditorToolbar = () => {
   return (
     <Toolbar>
-      <Button onClick={() => clearSymbolDraft()}>⨯</Button>
+      <Button onClick={() => undoSymbolEdits()}>undo</Button>
+      <Button onClick={() => clearSymbolDraft()}>clear</Button>
       <SaveSymbolButton />
     </Toolbar>
   );
@@ -61,11 +63,7 @@ const SymbolEditorToolbar = () => {
 const SaveSymbolButton = () => {
   const { mutate } = useSaveSymbolMutation();
   const draft = useSymbolDraft();
-  return (
-    <Button onClick={() => mutate(draft)} primary>
-      ↵
-    </Button>
-  );
+  return <Button onClick={() => mutate(draft)}>save</Button>;
 };
 
 const DebugButton = () => {
