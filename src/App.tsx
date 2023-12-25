@@ -1,6 +1,6 @@
 import { Subscribe } from "@react-rxjs/core";
 import clsx from "clsx";
-import { PropsWithChildren, ReactNode, useEffect, useState } from "react";
+import { PropsWithChildren, ReactNode, useState } from "react";
 import "./App.css";
 import { disableDebug, enableDebug, useIsDebugEnabled } from "./debug/state";
 import { GridLayout } from "./layout/GridLayout";
@@ -185,6 +185,3 @@ const PixelEditor = (props: { id: number }) => {
 };
 
 export default App;
-function useIsSymbolDraft() {
-  throw new Error("Function not implemented.");
-}

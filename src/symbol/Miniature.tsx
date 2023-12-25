@@ -19,7 +19,7 @@ export const Miniature = (props: MiniatureProps) => {
       onClick={() => editSymbol(props.symbol)}
       className={clsx("miniature", { miniatureSelected })}
     >
-      <p>{props.symbol}</p>
+      <p>{props.symbol === " " ? <>&nbsp;</> : props.symbol}</p>
       <GridLayout rows={rows} cols={cols} gap={1}>
         {pixelCells.map((i) => (
           <MiniaturePixel

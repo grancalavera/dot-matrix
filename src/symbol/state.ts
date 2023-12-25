@@ -12,13 +12,13 @@ export {
   toggleSymbolPixel,
   undoSymbolEdits,
   useIsSymbolDraftPixelOn as useIsPixelOn,
+  useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
   useIsSymbolPixelOn,
   useIsSymbolSelected,
   useSaveSymbolMutation,
   useSymbol,
   useSymbolDraft,
-  useIsSymbolDraftEmpty,
 };
 
 const [openSymbol$, editSymbol] = createSignal<string>();
