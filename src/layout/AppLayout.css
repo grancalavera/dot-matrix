@@ -1,0 +1,13 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app-layout-header {
+  border-block-end: 1px solid black;
+}
+
+.app-layout-body {
+  flex-grow: 1;
+}

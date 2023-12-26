@@ -1,0 +1,13 @@
+.section-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.section-layout-body {
+  flex-grow: 1;
+}
+
+.section-layout-footer {
+  border-block-start: 1px solid black;
+}

@@ -1,0 +1,20 @@
+.symbol-editor-pixel {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ccc;
+}
+
+.symbol-editor-pixel:hover {
+  border: 1px solid black;
+}
+
+.symbol-editor-pixel.on {
+  background-color: black;
+}
+
+.symbol-editor-pixel .debug-view {
+  color: #ccc;
+  margin: 0;
+  padding: 0 var(--pad);
+  font-size: 0.8em;
+}

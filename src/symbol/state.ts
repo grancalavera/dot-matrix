@@ -9,11 +9,11 @@ import * as service from "./service";
 export {
   clearSymbolDraft,
   editSymbol,
+  resetSymbolEdits,
   toggleSymbolPixel,
-  undoSymbolEdits,
-  useIsSymbolDraftPixelOn as useIsPixelOn,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
+  useIsSymbolDraftPixelOn,
   useIsSymbolPixelOn,
   useIsSymbolSelected,
   useSaveSymbolMutation,
@@ -24,7 +24,7 @@ export {
 const [openSymbol$, editSymbol] = createSignal<string>();
 const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
 const [clear$, clearSymbolDraft] = createSignal();
-const [undo$, undoSymbolEdits] = createSignal();
+const [reset$, resetSymbolEdits] = createSignal();
 
 const [useSymbol] = bind(service.symbol$);
 
@@ -36,7 +36,7 @@ const [useSymbolDraft, symbolDraft$] = bind(
       startWith(defaultSymbolId),
       switchMap((id) => {
         const read$ = service.symbol$(id).pipe(first());
-        return concat(read$, undo$.pipe(switchMap(() => read$)));
+        return concat(read$, reset$.pipe(switchMap(() => read$)));
       })
     ),
   }).pipe(

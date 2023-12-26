@@ -1,0 +1,6 @@
+.symbol-designer {
+  display: flex;
+  gap: 2px;
+  height: 100%;
+  justify-content: space-around;
+}

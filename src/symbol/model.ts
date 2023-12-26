@@ -13,9 +13,10 @@ export const defaultSymbolId = symbols[0] ?? "Z";
 export type SymbolDescription = { id: string; data: SymbolData };
 export type SymbolData = Map<number, boolean>;
 
-const rows = 9;
-const cols = 7;
-const symbolSize = rows * cols;
+export const symbolRows = 9;
+export const symbolCols = 7;
+export const symbolSize = symbolRows * symbolCols;
+export const symbolVector = Array.from({ length: symbolSize }, (_, i) => i);
 
 export const emptySymbol = (): SymbolData => {
   const symbol = new Map<number, boolean>();
