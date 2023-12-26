@@ -5,7 +5,7 @@ import {
   setMessage,
   useIsEmptyMessage,
   useMessageCharCount,
-  useMessge,
+  useMessage,
 } from "./state";
 
 export const ComposerToolbar = () => {
@@ -14,7 +14,9 @@ export const ComposerToolbar = () => {
     <Toolbar className="compose-toolbar">
       <MessageLengthMonitor />
       <MessageComposer />
-      <Button disabled={isEmpty}>play</Button>
+      <Button disabled={isEmpty} primary>
+        play
+      </Button>
       <Button onClick={() => clearMessage()} disabled={isEmpty}>
         clear
       </Button>
@@ -28,7 +30,7 @@ const MessageComposer = () => (
   <input
     type="text"
     placeholder={"..."}
-    value={useMessge()}
+    value={useMessage()}
     onChange={(e) => setMessage(e.target.value)}
   />
 );

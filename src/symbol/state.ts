@@ -20,7 +20,7 @@ export {
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
   useIsSymbolDraftPixelOn,
-  useIsSymbolPixelOn,
+  useSymbolPixelValue,
   useIsSymbolSelected,
   useSaveSymbolMutation,
   useSymbol,
@@ -79,7 +79,7 @@ const [useIsSymbolDraftPixelOn] = bind((index: number) =>
   symbolDraft$.pipe(map((draft) => draft.data.get(index) ?? false))
 );
 
-const [useIsSymbolPixelOn] = bind((id: string, index: number) => {
+const [useSymbolPixelValue] = bind((id: string, index: number) => {
   return service.symbol$(id).pipe(
     map((symbol) => symbol.data.get(index) ?? false),
     startWith(false)

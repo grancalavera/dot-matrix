@@ -1,7 +1,7 @@
 import { createSignal } from "@react-rxjs/utils";
+import memoize from "lodash/memoize";
 import { concat, defer, filter, map, of } from "rxjs";
 import { SymbolDescription, emptySymbol } from "./model";
-import memoize from "lodash/memoize";
 
 const [invalidate$, invalidate] = createSignal<string>();
 

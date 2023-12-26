@@ -1,10 +1,10 @@
 import clsx from "clsx";
 import { GridLayout } from "../layout/GridLayout";
-import "./SymbolThumbnails.css";
+import "./SymbolEditorThumbnails.css";
 import { symbolCols, symbolRows, symbolVector, symbols } from "./model";
-import { editSymbol, useIsSymbolPixelOn, useIsSymbolSelected } from "./state";
+import { editSymbol, useSymbolPixelValue, useIsSymbolSelected } from "./state";
 
-export const SymbolThumbnails = () => (
+export const SymbolEditorThumbnails = () => (
   <GridLayout rows={6} cols={6} gap={{ rowGap: 10, columnGap: 4 }}>
     {symbols.map((symbol) => (
       <SymbolThumbnail key={symbol} symbol={symbol} />
@@ -45,6 +45,6 @@ type PixelProps = SymbolThumbnailProps & {
 };
 
 const Pixel = (props: PixelProps) => {
-  const on = useIsSymbolPixelOn(props.symbol, props.pixelId);
+  const on = useSymbolPixelValue(props.symbol, props.pixelId);
   return <div className={clsx("symbol-thumbnail-pixel", { on })}></div>;
 };

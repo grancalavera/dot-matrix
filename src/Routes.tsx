@@ -1,6 +1,6 @@
 import { Compose } from "./Compose";
 import { Design } from "./Design";
-import { useSelectedSection } from "./state";
+import { useSelectedSection } from "./navigation/state";
 
 export const Routes = () => {
   const section = useSelectedSection();

@@ -1,7 +1,12 @@
 .center-layout {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
   width: 100%;
+}
+
+.debug .center-layout {
+  border: 1px solid hotpink;
 }

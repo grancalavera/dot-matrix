@@ -2,29 +2,36 @@ import { bind } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import { map, scan, startWith } from "rxjs";
 import { assertNever } from "../lib/assertNever";
-import { isValidMessageLength, sanitizeMessage } from "./model";
+import {
+  formatCharCount,
+  isValidMessageLength,
+  sanitizeMessage,
+} from "./model";
 
 export {
   clearMessage,
   setMessage,
-  useMessageCharCount,
-  useMessge,
   useIsEmptyMessage,
+  useMessage,
+  useMessageCharCount,
+  useScreenBufferSymbol,
 };
 
-const [unsafeMessage$, setMessage] = createSignal<string>();
+const [setMessage$, setMessage] = createSignal<string>();
 const [clear$, clearMessage] = createSignal();
 
-const [useMessge, message$] = bind(
-  mergeWithKey({ message$: unsafeMessage$, clear$ }).pipe(
-    scan((currentMessage, signal) => {
+const [useMessage, message$] = bind(
+  mergeWithKey({ setMessage$, clear$ }).pipe(
+    scan((buffer, signal) => {
       switch (signal.type) {
-        case "message$":
+        case "setMessage$": {
           return isValidMessageLength(signal.payload)
             ? sanitizeMessage(signal.payload)
-            : currentMessage;
-        case "clear$":
+            : buffer;
+        }
+        case "clear$": {
           return "";
+        }
         default:
           assertNever(signal);
       }
@@ -34,12 +41,13 @@ const [useMessge, message$] = bind(
 );
 
 const [useMessageCharCount] = bind(
-  message$.pipe(
-    map((message) => message.length),
-    map((count) => count.toString().padStart(2, "0"))
-  )
+  message$.pipe(map((message) => formatCharCount(message.length)))
 );
 
 const [useIsEmptyMessage] = bind(
   message$.pipe(map((message) => message === ""))
+);
+
+const [useScreenBufferSymbol] = bind((index: number) =>
+  message$.pipe(map((message) => message[index]))
 );

@@ -1,12 +1,12 @@
 import { CenterLayout } from "../layout/CenterLayout";
 import "./SymbolDesigner.css";
 import { SymbolEditor } from "./SymbolEditor";
-import { SymbolThumbnails } from "./SymbolThumbnails";
+import { SymbolEditorThumbnails } from "./SymbolEditorThumbnails";
 
 export const SymbolDesigner = () => (
   <div className="symbol-designer">
     <CenterLayout>
-      <SymbolThumbnails />
+      <SymbolEditorThumbnails />
     </CenterLayout>
     <CenterLayout>
       <SymbolEditor />

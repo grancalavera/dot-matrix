@@ -1,0 +1,36 @@
+.screen-buffer {
+  padding: var(--pad) 0;
+}
+
+.screen-buffer-thumbnail {
+  border: 1px solid white;
+}
+
+.screen-buffer-thumbnail .debug-view {
+  background-color: black;
+  color: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0 var(--pad);
+}
+
+.screen-buffer-thumbnail-pixel {
+  width: 3px;
+  height: 3px;
+  background-color: #f5f5f5;
+}
+
+.screen-buffer-thumbnail.active {
+  &:hover {
+    border-color: black;
+  }
+
+  & .screen-buffer-thumbnail-pixel {
+    background-color: #ddd;
+  }
+
+  & .screen-buffer-thumbnail-pixel.on {
+    background-color: black;
+  }
+}
