@@ -1,46 +1,34 @@
 import { Button, Toolbar } from "../components";
 import {
-  useIsSymbolDraftModified,
-  resetSymbolEdits,
-  useIsSymbolDraftEmpty,
   clearSymbolDraft,
+  resetSymbolEdits,
+  transposeSymbol,
+  useIsSymbolDraftEmpty,
+  useIsSymbolDraftModified,
   useSaveSymbolMutation,
   useSymbolDraft,
 } from "./state";
 
-export const SymbolDesignerToolbar = () => (
-  <Toolbar>
-    <ResetSymbolEditsButton />
-    <ClearSymbolDraftButton />
-    <SaveSymbolButton />
-  </Toolbar>
-);
-
-const ResetSymbolEditsButton = () => {
-  const disabled = !useIsSymbolDraftModified();
-  return (
-    <Button onClick={() => resetSymbolEdits()} disabled={disabled}>
-      reset
-    </Button>
-  );
-};
-
-const ClearSymbolDraftButton = () => {
-  const disabled = useIsSymbolDraftEmpty();
-  return (
-    <Button onClick={() => clearSymbolDraft()} disabled={disabled}>
-      clear
-    </Button>
-  );
-};
-
-const SaveSymbolButton = () => {
+export const SymbolDesignerToolbar = () => {
   const { mutate } = useSaveSymbolMutation();
   const draft = useSymbolDraft();
-  const disabled = !useIsSymbolDraftModified();
+  const draftIsEmpty = useIsSymbolDraftEmpty();
+  const draftIsNotModified = !useIsSymbolDraftModified();
+
   return (
-    <Button onClick={() => mutate(draft)} disabled={disabled}>
-      save
-    </Button>
+    <Toolbar>
+      <Button onClick={() => transposeSymbol()} disabled={draftIsEmpty}>
+        transpose
+      </Button>
+      <Button onClick={() => resetSymbolEdits()} disabled={draftIsNotModified}>
+        reset
+      </Button>
+      <Button onClick={() => clearSymbolDraft()} disabled={draftIsEmpty}>
+        clear
+      </Button>
+      <Button onClick={() => mutate(draft)} disabled={draftIsNotModified}>
+        save
+      </Button>
+    </Toolbar>
   );
 };

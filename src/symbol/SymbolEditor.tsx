@@ -6,20 +6,20 @@ import { toggleSymbolPixel, useIsSymbolDraftPixelOn } from "./state";
 
 export const SymbolEditor = () => (
   <GridLayout rows={symbolRows} cols={symbolCols}>
-    {symbolVector.map((i) => (
-      <SymbolEditorPixel key={i} id={i} />
+    {symbolVector.map((pixelId) => (
+      <SymbolEditorPixel key={pixelId} pixelId={pixelId} />
     ))}
   </GridLayout>
 );
 
-const SymbolEditorPixel = (props: { id: number }) => {
-  const on = useIsSymbolDraftPixelOn(props.id);
+const SymbolEditorPixel = (props: { pixelId: number }) => {
+  const on = useIsSymbolDraftPixelOn(props.pixelId);
   return (
     <div
       className={clsx("symbol-editor-pixel", { on })}
-      onClick={() => toggleSymbolPixel(props.id)}
+      onClick={() => toggleSymbolPixel(props.pixelId)}
     >
-      <pre className="debug-view">{props.id}</pre>
+      <pre className="debug-view">{props.pixelId}</pre>
     </div>
   );
 };

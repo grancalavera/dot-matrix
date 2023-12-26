@@ -2,8 +2,8 @@ import { PropsWithChildren } from "react";
 import "./components.css";
 import clsx from "clsx";
 
-export const Toolbar = (props: PropsWithChildren) => (
-  <div className="toolbar">{props.children}</div>
+export const Toolbar = (props: PropsWithChildren<{ className?: string }>) => (
+  <div className={clsx("toolbar", props.className)}>{props.children}</div>
 );
 
 type ButtonProps = {

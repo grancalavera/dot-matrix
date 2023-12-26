@@ -13,8 +13,9 @@
 }
 
 .symbol-editor-pixel .debug-view {
-  color: #ccc;
   margin: 0;
   padding: 0 var(--pad);
   font-size: 0.8em;
+  background-color: hotpink;
+  color: white;
 }

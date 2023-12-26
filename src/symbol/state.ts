@@ -3,7 +3,12 @@ import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import { concat, first, map, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
-import { defaultSymbolDescription, defaultSymbolId, isModified } from "./model";
+import {
+  defaultSymbolDescription,
+  defaultSymbolId,
+  isModified,
+  transposeSymbolDescription,
+} from "./model";
 import * as service from "./service";
 
 export {
@@ -11,6 +16,7 @@ export {
   editSymbol,
   resetSymbolEdits,
   toggleSymbolPixel,
+  transposeSymbol,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
   useIsSymbolDraftPixelOn,
@@ -25,6 +31,7 @@ const [openSymbol$, editSymbol] = createSignal<string>();
 const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
 const [clear$, clearSymbolDraft] = createSignal();
 const [reset$, resetSymbolEdits] = createSignal();
+const [transpose$, transposeSymbol] = createSignal();
 
 const [useSymbol] = bind(service.symbol$);
 
@@ -32,6 +39,7 @@ const [useSymbolDraft, symbolDraft$] = bind(
   mergeWithKey({
     togglePixel$,
     clear$,
+    transpose$,
     symbol$: openSymbol$.pipe(
       startWith(defaultSymbolId),
       switchMap((id) => {
@@ -51,6 +59,9 @@ const [useSymbolDraft, symbolDraft$] = bind(
         }
         case "symbol$": {
           return signal.payload;
+        }
+        case "transpose$": {
+          return transposeSymbolDescription(draft);
         }
         default: {
           assertNever(signal);

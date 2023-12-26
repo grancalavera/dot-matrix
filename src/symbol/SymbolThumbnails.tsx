@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { GridLayout } from "../layout/GridLayout";
 import "./SymbolThumbnails.css";
-import { symbolCols, symbolVector, symbolRows, symbols } from "./model";
+import { symbolCols, symbolRows, symbolVector, symbols } from "./model";
 import { editSymbol, useIsSymbolPixelOn, useIsSymbolSelected } from "./state";
 
 export const SymbolThumbnails = () => (
@@ -28,8 +28,12 @@ const SymbolThumbnail = (props: SymbolThumbnailProps) => {
         {props.symbol === " " ? <>&nbsp;</> : props.symbol}
       </p>
       <GridLayout rows={symbolRows} cols={symbolCols} gap={1}>
-        {symbolVector.map((i) => (
-          <Pixel key={`${props.symbol}-${i}`} symbol={props.symbol} index={i} />
+        {symbolVector.map((pixelId) => (
+          <Pixel
+            key={`${props.symbol}-${pixelId}`}
+            symbol={props.symbol}
+            pixelId={pixelId}
+          />
         ))}
       </GridLayout>
     </div>
@@ -37,10 +41,10 @@ const SymbolThumbnail = (props: SymbolThumbnailProps) => {
 };
 
 type PixelProps = SymbolThumbnailProps & {
-  index: number;
+  pixelId: number;
 };
 
 const Pixel = (props: PixelProps) => {
-  const on = useIsSymbolPixelOn(props.symbol, props.index);
+  const on = useIsSymbolPixelOn(props.symbol, props.pixelId);
   return <div className={clsx("symbol-thumbnail-pixel", { on })}></div>;
 };

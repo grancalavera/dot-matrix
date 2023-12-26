@@ -6,9 +6,11 @@ export const symbols = [
   "I", "J", "K", "L", "M", "N", 
   "O", "P", "Q", "R", "S", "T", 
   "U", "V", "W", "X", "Y", "Z",
-   " "
+   " ", "'", "!", "?"
 ]
 export const defaultSymbolId = symbols[0] ?? "Z";
+
+export const isKnownSymbol = (symbol: string) => symbols.includes(symbol);
 
 export type SymbolDescription = { id: string; data: SymbolData };
 export type SymbolData = Map<number, boolean>;
@@ -16,7 +18,21 @@ export type SymbolData = Map<number, boolean>;
 export const symbolRows = 9;
 export const symbolCols = 7;
 export const symbolSize = symbolRows * symbolCols;
-export const symbolVector = Array.from({ length: symbolSize }, (_, i) => i);
+
+const transposeIndex = (index: number): number => {
+  const row = Math.floor(index / symbolCols);
+  const col = index % symbolCols;
+  return col * symbolRows + row;
+};
+
+/**
+ * A column major vector of indices for a 2D matrix of size `symbolRows` x `symbolCols`.
+ */
+export const symbolVector = Array.from({ length: symbolSize }, (_, i) => {
+  // we render the pixels in row-major order, but we store them in
+  // column-major order, so we need to transpose the index.
+  return transposeIndex(i);
+});
 
 export const emptySymbol = (): SymbolData => {
   const symbol = new Map<number, boolean>();
@@ -43,4 +59,16 @@ export const isModified = (
     }
   }
   return false;
+};
+
+export const transposeSymbolDescription = (
+  symbol: SymbolDescription
+): SymbolDescription => {
+  const data: SymbolData = new Map();
+
+  [...symbol.data.entries()].forEach(([index, value]) => {
+    data.set(transposeIndex(index), value);
+  });
+
+  return { id: symbol.id, data };
 };
