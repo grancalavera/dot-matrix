@@ -6,18 +6,32 @@ import {
   useIsEmptyMessage,
   useMessageCharCount,
   useMessage,
+  useIsPlayingMessage,
+  pauseMessage,
+  playMessage,
 } from "./state";
 
 export const ComposerToolbar = () => {
   const isEmpty = useIsEmptyMessage();
+  const isPlaying = useIsPlayingMessage();
   return (
     <Toolbar className="compose-toolbar">
       <MessageLengthMonitor />
       <MessageComposer />
-      <Button disabled={isEmpty} primary>
-        play
+      <Button
+        disabled={isEmpty}
+        primary
+        onClick={() => (isPlaying ? pauseMessage() : playMessage())}
+      >
+        {isPlaying ? "stop" : "play"}
       </Button>
-      <Button onClick={() => clearMessage()} disabled={isEmpty}>
+      <Button
+        onClick={() => {
+          pauseMessage();
+          clearMessage();
+        }}
+        disabled={isEmpty}
+      >
         clear
       </Button>
     </Toolbar>

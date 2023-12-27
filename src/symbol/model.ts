@@ -3,7 +3,7 @@ export const symbols = [
   "1", "2", "3", "4", "5", "6", 
   "7", "8", "9", "0", "A", "B", 
   "C", "D", "E", "F", "G", "H", 
-  "I", "J", "K", "L", "M", "N", 
+  "I", "J", "K", "L", "M", "N",
   "O", "P", "Q", "R", "S", "T", 
   "U", "V", "W", "X", "Y", "Z",
    " ", "'", "!", "?"
@@ -19,19 +19,23 @@ export const symbolRows = 9;
 export const symbolCols = 7;
 export const symbolSize = symbolRows * symbolCols;
 
-const transposeIndex = (index: number): number => {
-  const row = Math.floor(index / symbolCols);
-  const col = index % symbolCols;
-  return col * symbolRows + row;
+export const transposeIndex = (
+  index: number,
+  rows: number,
+  cols: number
+): number => {
+  const row = Math.floor(index / cols);
+  const col = index % cols;
+  return col * rows + row;
 };
 
 /**
  * A column major vector of indices for a 2D matrix of size `symbolRows` x `symbolCols`.
+ * we render the pixels in row-major order, but we store them in column-major order, so
+ * we need to transpose the index.
  */
 export const symbolVector = Array.from({ length: symbolSize }, (_, i) => {
-  // we render the pixels in row-major order, but we store them in
-  // column-major order, so we need to transpose the index.
-  return transposeIndex(i);
+  return transposeIndex(i, symbolRows, symbolCols);
 });
 
 export const emptySymbol = (): SymbolData => {
@@ -67,7 +71,7 @@ export const transposeSymbolDescription = (
   const data: SymbolData = new Map();
 
   [...symbol.data.entries()].forEach(([index, value]) => {
-    data.set(transposeIndex(index), value);
+    data.set(transposeIndex(index, symbolRows, symbolCols), value);
   });
 
   return { id: symbol.id, data };

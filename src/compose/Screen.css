@@ -1,0 +1,13 @@
+.screen-pixel {
+  width: 11px;
+  height: 11px;
+  background-color: #eee;
+}
+
+.screen-pixel.on {
+  background-color: black;
+}
+
+.screen button {
+  margin-top: 40px;
+}

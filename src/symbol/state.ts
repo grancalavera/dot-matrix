@@ -4,6 +4,7 @@ import { concat, first, map, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
 import {
+  SymbolDescription,
   defaultSymbolDescription,
   defaultSymbolId,
   isModified,
@@ -25,6 +26,8 @@ export {
   useSaveSymbolMutation,
   useSymbol,
   useSymbolDraft,
+  symbol$,
+  symbolChanged$,
 };
 
 const [openSymbol$, editSymbol] = createSignal<string>();
@@ -32,8 +35,9 @@ const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
 const [clear$, clearSymbolDraft] = createSignal();
 const [reset$, resetSymbolEdits] = createSignal();
 const [transpose$, transposeSymbol] = createSignal();
+const [symbolChanged$, notifySymbolChanged] = createSignal<string>();
 
-const [useSymbol] = bind(service.symbol$);
+const [useSymbol, symbol$] = bind(service.symbol$);
 
 const [useSymbolDraft, symbolDraft$] = bind(
   mergeWithKey({
@@ -86,7 +90,11 @@ const [useSymbolPixelValue] = bind((id: string, index: number) => {
   );
 });
 
-const useSaveSymbolMutation = () => useMutation(service.saveSymbol);
+const useSaveSymbolMutation = () =>
+  useMutation(async (symbolDescription: SymbolDescription) => {
+    await service.saveSymbol(symbolDescription);
+    notifySymbolChanged(symbolDescription.id);
+  });
 
 const [useIsSymbolDraftModified] = bind(
   symbolDraft$.pipe(

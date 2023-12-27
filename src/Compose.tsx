@@ -1,13 +1,11 @@
-import { BufferThumbnail, ScreenBuffer } from "./compose/ScreenBuffer";
 import { ComposerToolbar } from "./compose/ComposeToolbar";
-import { messageMaxLength } from "./compose/model";
-import { CenterLayout } from "./layout/CenterLayout";
-import { GridLayout } from "./layout/GridLayout";
+import { Screen } from "./compose/Screen";
+import { ScreenBuffer } from "./compose/ScreenBuffer";
 import { SectionLayout } from "./layout/SectionLayout";
 
 export const Compose = () => (
   <SectionLayout
-    body={<SectionLayout body={"screen"} footer={<ScreenBuffer />} />}
+    body={<SectionLayout body={<Screen />} footer={<ScreenBuffer />} />}
     footer={<ComposerToolbar />}
   />
 );
