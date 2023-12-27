@@ -8,5 +8,5 @@ export type Section = "design" | "compose";
 const [section$, changeSection] = createSignal<Section>();
 
 const [useSelectedSection] = bind(
-  section$.pipe(startWith("compose" as Section))
+  section$.pipe(startWith("design" as Section))
 );

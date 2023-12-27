@@ -48,7 +48,7 @@ const [play$, playMessage] = createSignal();
 const [pause$, pauseMessage] = createSignal();
 const [rewind$, rewindMessage] = createSignal();
 
-const defaultMessage = symbols.join("");
+const defaultMessage = "";
 
 const [useMessage, message$] = bind(
   mergeWithKey({ setMessage$, clear$ }).pipe(

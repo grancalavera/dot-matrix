@@ -65,14 +65,12 @@ export const isModified = (
   return false;
 };
 
-export const transposeSymbolDescription = (
-  symbol: SymbolDescription
-): SymbolDescription => {
-  const data: SymbolData = new Map();
+export const invertSymbol = (symbol: SymbolDescription): SymbolDescription => {
+  symbol.data.forEach((value, key) => symbol.data.set(key, !value));
+  return symbol;
+};
 
-  [...symbol.data.entries()].forEach(([index, value]) => {
-    data.set(transposeIndex(index, symbolRows, symbolCols), value);
-  });
-
-  return { id: symbol.id, data };
+export const fillSymbol = (symbol: SymbolDescription): SymbolDescription => {
+  symbol.data.forEach((_, key) => symbol.data.set(key, true));
+  return symbol;
 };

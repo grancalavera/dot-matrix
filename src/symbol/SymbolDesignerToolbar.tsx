@@ -2,12 +2,14 @@ import { Button, Toolbar } from "../components";
 import {
   clearSymbolDraft,
   resetSymbolEdits,
-  transposeSymbol,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
   useSaveSymbolMutation,
   useSymbolDraft,
+  invertSymbol,
+  fillSymbol,
 } from "./state";
+import "./SymbolDesignerToolbar.css";
 
 export const SymbolDesignerToolbar = () => {
   const { mutate } = useSaveSymbolMutation();
@@ -16,17 +18,26 @@ export const SymbolDesignerToolbar = () => {
   const draftIsNotModified = !useIsSymbolDraftModified();
 
   return (
-    <Toolbar>
-      <Button onClick={() => transposeSymbol()} disabled={draftIsEmpty}>
-        transpose
+    <Toolbar className="symbol-designer-toolbar">
+      <Button className="button-section" onClick={() => fillSymbol()}>
+        fill
       </Button>
-      <Button onClick={() => resetSymbolEdits()} disabled={draftIsNotModified}>
-        reset
-      </Button>
+      <Button onClick={() => invertSymbol()}>invert</Button>
       <Button onClick={() => clearSymbolDraft()} disabled={draftIsEmpty}>
         clear
       </Button>
-      <Button onClick={() => mutate(draft)} disabled={draftIsNotModified}>
+      <Button
+        className="button-section"
+        onClick={() => resetSymbolEdits()}
+        disabled={draftIsNotModified}
+      >
+        reset
+      </Button>
+      <Button
+        onClick={() => mutate(draft)}
+        disabled={draftIsNotModified}
+        primary
+      >
         save
       </Button>
     </Toolbar>

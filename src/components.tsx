@@ -10,6 +10,7 @@ type ButtonProps = {
   primary?: boolean;
   disabled?: boolean;
   onClick?: () => void;
+  className?: string;
 };
 
 export const Button = ({
@@ -17,13 +18,14 @@ export const Button = ({
   children,
   onClick,
   disabled,
+  className,
 }: PropsWithChildren<ButtonProps>) => (
   <button
     onClick={() => {
       if (disabled) return;
       onClick?.();
     }}
-    className={clsx({ primary, disabled })}
+    className={clsx(className, { primary, disabled })}
   >
     {children}
   </button>

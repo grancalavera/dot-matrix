@@ -1,5 +1,4 @@
 .compose-toolbar input {
   flex-grow: 1;
-  border-inline-end: 1px solid black;
   border-inline-start: 1px solid black;
 }

@@ -3,39 +3,36 @@ import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import { concat, first, map, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
-import {
-  SymbolDescription,
-  defaultSymbolDescription,
-  defaultSymbolId,
-  isModified,
-  transposeSymbolDescription,
-} from "./model";
+import * as model from "./model";
+import { SymbolDescription } from "./model";
 import * as service from "./service";
 
 export {
   clearSymbolDraft,
   editSymbol,
+  fillSymbol,
+  invertSymbol,
   resetSymbolEdits,
+  symbol$,
+  symbolChanged$,
   toggleSymbolPixel,
-  transposeSymbol,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
   useIsSymbolDraftPixelOn,
-  useSymbolPixelValue,
   useIsSymbolSelected,
   useSaveSymbolMutation,
   useSymbol,
   useSymbolDraft,
-  symbol$,
-  symbolChanged$,
+  useSymbolPixelValue,
 };
 
 const [openSymbol$, editSymbol] = createSignal<string>();
 const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
 const [clear$, clearSymbolDraft] = createSignal();
 const [reset$, resetSymbolEdits] = createSignal();
-const [transpose$, transposeSymbol] = createSignal();
 const [symbolChanged$, notifySymbolChanged] = createSignal<string>();
+const [invert$, invertSymbol] = createSignal();
+const [fill$, fillSymbol] = createSignal();
 
 const [useSymbol, symbol$] = bind(service.symbol$);
 
@@ -43,9 +40,10 @@ const [useSymbolDraft, symbolDraft$] = bind(
   mergeWithKey({
     togglePixel$,
     clear$,
-    transpose$,
+    invert$,
+    fill$,
     symbol$: openSymbol$.pipe(
-      startWith(defaultSymbolId),
+      startWith(model.defaultSymbolId),
       switchMap((id) => {
         const read$ = service.symbol$(id).pipe(first());
         return concat(read$, reset$.pipe(switchMap(() => read$)));
@@ -59,19 +57,22 @@ const [useSymbolDraft, symbolDraft$] = bind(
           return draft;
         }
         case "clear$": {
-          return defaultSymbolDescription(draft.id);
+          return model.defaultSymbolDescription(draft.id);
         }
         case "symbol$": {
           return signal.payload;
         }
-        case "transpose$": {
-          return transposeSymbolDescription(draft);
+        case "invert$": {
+          return model.invertSymbol(draft);
+        }
+        case "fill$": {
+          return model.fillSymbol(draft);
         }
         default: {
           assertNever(signal);
         }
       }
-    }, defaultSymbolDescription())
+    }, model.defaultSymbolDescription())
   )
 );
 
@@ -101,7 +102,7 @@ const [useIsSymbolDraftModified] = bind(
     switchMap((draft) =>
       service
         .symbol$(draft.id)
-        .pipe(map((original) => isModified(original.data, draft.data)))
+        .pipe(map((original) => model.isModified(original.data, draft.data)))
     )
   )
 );
