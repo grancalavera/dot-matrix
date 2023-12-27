@@ -1,24 +1,60 @@
+import { useRef } from "react";
 import { Button, Toolbar } from "../components";
 import "./ComposeToolbar.css";
 import {
   clearMessage,
-  setMessage,
-  useIsEmptyMessage,
-  useMessageCharCount,
-  useMessage,
-  useIsPlayingMessage,
   pauseMessage,
   playMessage,
   rewindMessage,
+  setMessage,
+  useIsEmptyMessage,
+  useIsPlayingMessage,
+  useMessage,
+  useMessageCharCount,
 } from "./state";
 
-export const ComposerToolbar = () => {
+export const ComposerToolbar = () => (
+  <Toolbar className="compose-toolbar">
+    <MessageLengthMonitor />
+    <MessageInput />
+    <MessageActions />
+  </Toolbar>
+);
+
+const MessageLengthMonitor = () => <p>{useMessageCharCount()}</p>;
+
+const MessageInput = () => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const message = useMessage();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { selectionStart, selectionEnd } = e.target;
+    setMessage(e.target.value);
+    requestAnimationFrame(() => {
+      if (inputRef.current) {
+        inputRef.current.selectionStart = selectionStart;
+        inputRef.current.selectionEnd = selectionEnd;
+      }
+    });
+  };
+
+  return (
+    <input
+      ref={inputRef}
+      type="text"
+      placeholder={"..."}
+      value={message}
+      onChange={handleChange}
+    />
+  );
+};
+
+const MessageActions = () => {
   const isEmpty = useIsEmptyMessage();
   const isPlaying = useIsPlayingMessage();
+
   return (
-    <Toolbar className="compose-toolbar">
-      <MessageLengthMonitor />
-      <MessageComposer />
+    <>
       <Button
         disabled={isEmpty}
         primary
@@ -38,17 +74,6 @@ export const ComposerToolbar = () => {
       <Button onClick={() => rewindMessage()} disabled={isEmpty}>
         rewind
       </Button>
-    </Toolbar>
+    </>
   );
 };
-
-const MessageLengthMonitor = () => <p>{useMessageCharCount()}</p>;
-
-const MessageComposer = () => (
-  <input
-    type="text"
-    placeholder={"..."}
-    value={useMessage()}
-    onChange={(e) => setMessage(e.target.value)}
-  />
-);

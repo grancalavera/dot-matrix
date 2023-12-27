@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { CenterLayout } from "../layout/CenterLayout";
 import { GridLayout } from "../layout/GridLayout";
+import { symbolSize } from "../symbol/model";
 import "./Screen.css";
 import {
   bufferSize,
@@ -9,12 +10,7 @@ import {
   screenSize,
   screenVector,
 } from "./model";
-import {
-  useIsPixelUnderPlayhead,
-  usePlayhead,
-  useScreenPixelValue,
-} from "./state";
-import { symbolSize } from "../symbol/model";
+import { usePlayhead, useScreenPixelValue } from "./state";
 
 export const Screen = () => {
   return (
@@ -43,13 +39,5 @@ const DebugView = () => {
 
 const Pixel = (props: { pixelId: number }) => {
   const on = useScreenPixelValue(props.pixelId);
-  const playing = useIsPixelUnderPlayhead(props.pixelId);
-  return (
-    <div
-      className={clsx("screen-pixel", {
-        on,
-        playing,
-      })}
-    ></div>
-  );
+  return <div className={clsx("screen-pixel", { on })}></div>;
 };

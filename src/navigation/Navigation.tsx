@@ -5,8 +5,8 @@ import { Section, changeSection, useSelectedSection } from "./state";
 export const Navigation = () => (
   <>
     <DebugButton />
-    <NavigationButton section="design" />
     <NavigationButton section="compose" />
+    <NavigationButton section="design" />
   </>
 );
 

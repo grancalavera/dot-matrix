@@ -1,14 +1,17 @@
 import { Subscribe } from "@react-rxjs/core";
+import { Suspense } from "react";
 import "./App.css";
+import { Routes } from "./Routes";
 import { AppLayout } from "./layout/AppLayout";
 import { Navigation } from "./navigation/Navigation";
-import { Routes } from "./Routes";
 
 function App() {
   return (
-    <Subscribe>
-      <AppLayout header={<Navigation />} body={<Routes />} />
-    </Subscribe>
+    <Suspense>
+      <Subscribe>
+        <AppLayout header={<Navigation />} body={<Routes />} />
+      </Subscribe>
+    </Suspense>
   );
 }
 

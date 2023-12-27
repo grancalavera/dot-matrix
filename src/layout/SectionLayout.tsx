@@ -1,8 +1,10 @@
+import { ReactNode } from "react";
+import "./SectionLayout.css";
+
 type SectionLayoutProps = {
   body?: ReactNode;
   footer?: ReactNode;
 };
-import "./SectionLayout.css";
 
 export const SectionLayout = (props: SectionLayoutProps) => (
   <div className="section-layout">

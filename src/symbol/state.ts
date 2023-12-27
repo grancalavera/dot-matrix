@@ -1,42 +1,32 @@
-import { bind } from "@react-rxjs/core";
+import { bind, state } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
-import { concat, first, map, scan, startWith, switchMap } from "rxjs";
+import { concat, first, map, merge, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
 import * as model from "./model";
-import { SymbolDescription } from "./model";
 import * as service from "./service";
 
-export {
-  clearSymbolDraft,
-  editSymbol,
-  fillSymbol,
-  invertSymbol,
-  resetSymbolEdits,
-  symbol$,
-  symbolChanged$,
-  toggleSymbolPixel,
-  useIsSymbolDraftEmpty,
-  useIsSymbolDraftModified,
-  useIsSymbolDraftPixelOn,
-  useIsSymbolSelected,
-  useSaveSymbolMutation,
-  useSymbol,
-  useSymbolDraft,
-  useSymbolPixelValue,
-};
-
 const [openSymbol$, editSymbol] = createSignal<string>();
+export { editSymbol };
+
 const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
+export { toggleSymbolPixel };
+
 const [clear$, clearSymbolDraft] = createSignal();
+export { clearSymbolDraft };
+
 const [reset$, resetSymbolEdits] = createSignal();
-const [symbolChanged$, notifySymbolChanged] = createSignal<string>();
+export { resetSymbolEdits };
+
 const [invert$, invertSymbol] = createSignal();
+export { invertSymbol };
+
 const [fill$, fillSymbol] = createSignal();
+export { fillSymbol };
 
-const [useSymbol, symbol$] = bind(service.symbol$);
+export const [useSymbol, symbol$] = bind(service.symbol$);
 
-const [useSymbolDraft, symbolDraft$] = bind(
+export const [useSymbolDraft, symbolDraft$] = bind(
   mergeWithKey({
     togglePixel$,
     clear$,
@@ -76,28 +66,24 @@ const [useSymbolDraft, symbolDraft$] = bind(
   )
 );
 
-const [useIsSymbolSelected] = bind((id: string) =>
+export const [useIsSymbolSelected] = bind((id: string) =>
   symbolDraft$.pipe(map((draft) => draft.id === id))
 );
 
-const [useIsSymbolDraftPixelOn] = bind((index: number) =>
+export const [useIsSymbolDraftPixelOn] = bind((index: number) =>
   symbolDraft$.pipe(map((draft) => draft.data.get(index) ?? false))
 );
 
-const [useSymbolPixelValue] = bind((id: string, index: number) => {
+export const [useSymbolPixelValue] = bind((id: string, index: number) => {
   return service.symbol$(id).pipe(
     map((symbol) => symbol.data.get(index) ?? false),
     startWith(false)
   );
 });
 
-const useSaveSymbolMutation = () =>
-  useMutation(async (symbolDescription: SymbolDescription) => {
-    await service.saveSymbol(symbolDescription);
-    notifySymbolChanged(symbolDescription.id);
-  });
+export const useSaveSymbolMutation = () => useMutation(service.saveSymbol);
 
-const [useIsSymbolDraftModified] = bind(
+export const [useIsSymbolDraftModified] = bind(
   symbolDraft$.pipe(
     switchMap((draft) =>
       service
@@ -107,8 +93,14 @@ const [useIsSymbolDraftModified] = bind(
   )
 );
 
-const [useIsSymbolDraftEmpty] = bind(
+export const [useIsSymbolDraftEmpty] = bind(
   symbolDraft$.pipe(
     map((draft) => [...draft.data.values()].every((pixel) => !pixel))
+  )
+);
+
+export const symbolChanged$ = state(
+  merge(...model.symbols.map((x) => symbol$(x))).pipe(
+    map((symbol) => symbol.id)
   )
 );

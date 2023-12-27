@@ -3,6 +3,7 @@ import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import {
   combineLatest,
   distinctUntilChanged,
+  filter,
   first,
   forkJoin,
   interval,
@@ -15,42 +16,35 @@ import {
   takeUntil,
 } from "rxjs";
 import { assertNever } from "../lib/assertNever";
-import { symbols } from "../symbol/model";
 import { symbol$, symbolChanged$ } from "../symbol/state";
 import {
   advancePlayhead,
+  bufferFromSymbolDescriptions,
+  bufferSymbols,
+  defaultMessage,
   formatCharCount,
   isValidMessageLength,
   sanitizeMessage,
-  screenCharWidth,
   screenFrequency,
   screenPixelValue,
 } from "./model";
 
-export {
-  clearMessage,
-  pauseMessage,
-  playMessage,
-  rewindMessage,
-  setMessage,
-  useIsEmptyMessage,
-  useIsPixelUnderPlayhead,
-  useIsPlayingMessage,
-  useMessage,
-  useMessageCharCount,
-  usePlayhead,
-  useScreenBufferSymbol,
-};
-
 const [setMessage$, setMessage] = createSignal<string>();
+export { setMessage };
+
 const [clear$, clearMessage] = createSignal();
+export { clearMessage };
+
 const [play$, playMessage] = createSignal();
+export { playMessage };
+
 const [pause$, pauseMessage] = createSignal();
+export { pauseMessage };
+
 const [rewind$, rewindMessage] = createSignal();
+export { rewindMessage };
 
-const defaultMessage = "";
-
-const [useMessage, message$] = bind(
+export const [useMessage, message$] = bind(
   mergeWithKey({ setMessage$, clear$ }).pipe(
     scan((buffer, signal) => {
       switch (signal.type) {
@@ -70,32 +64,39 @@ const [useMessage, message$] = bind(
   )
 );
 
-const [useMessageCharCount] = bind(
+export const [useMessageCharCount] = bind(
   message$.pipe(map((message) => formatCharCount(message.length)))
 );
 
-const [useIsEmptyMessage] = bind(
+export const [useIsEmptyMessage] = bind(
   message$.pipe(map((message) => message === ""))
 );
 
-const [useScreenBufferSymbol] = bind((index: number) =>
+export const [useScreenBufferSymbol] = bind((index: number) =>
   message$.pipe(map((message) => message[index]))
 );
 
-const [useIsPlayingMessage] = bind(
-  merge(
-    play$.pipe(map(() => true)),
-    merge(pause$, rewind$).pipe(map(() => false))
-  ).pipe(startWith(false))
+const stop$ = merge(
+  pause$,
+  clear$,
+  rewind$,
+  message$.pipe(
+    filter((x) => x === ""),
+    map(() => undefined)
+  )
 );
 
-const [usePlayhead, playhead$] = bind(
+export const [useIsPlayingMessage] = bind(
+  mergeWithKey({ play$, stop$ }).pipe(
+    map((signal) => signal.type === "play$"),
+    startWith(false)
+  )
+);
+
+export const [usePlayhead, playhead$] = bind(
   mergeWithKey({
     advance$: play$.pipe(
-      switchMap(() => {
-        const stop$ = merge(pause$, clear$, rewind$);
-        return interval(screenFrequency).pipe(takeUntil(stop$));
-      })
+      switchMap(() => interval(screenFrequency).pipe(takeUntil(stop$)))
     ),
     rewind$: merge(clear$, rewind$),
   }).pipe(
@@ -108,27 +109,19 @@ const [usePlayhead, playhead$] = bind(
   )
 );
 
-const [useIsPixelUnderPlayhead] = bind((index: number) =>
-  playhead$.pipe(map((playhead) => playhead === index))
-);
-
 const buffer$ = state(
   combineLatest([message$, symbolChanged$.pipe(startWith(""))]).pipe(
     distinctUntilChanged(),
-    switchMap(([message]) => {
-      if (message.length === 0) {
-        return of([]);
-      }
-
-      const symbols = message
-        .padEnd(message.length + screenCharWidth, " ")
-        .split("");
-
-      return forkJoin(
-        symbols.map((symbol) => symbol$(symbol).pipe(first()))
-      ).pipe(first());
-    }),
-    map((symbols) => symbols.flatMap((symbol) => [...symbol.data.values()]))
+    switchMap(([message]) =>
+      message.length === 0
+        ? of([])
+        : forkJoin(
+            bufferSymbols(message).map((symbol) =>
+              symbol$(symbol).pipe(first())
+            )
+          ).pipe(first())
+    ),
+    map(bufferFromSymbolDescriptions)
   )
 );
 
