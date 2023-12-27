@@ -9,6 +9,7 @@ import {
   useIsPlayingMessage,
   pauseMessage,
   playMessage,
+  rewindMessage,
 } from "./state";
 
 export const ComposerToolbar = () => {
@@ -33,6 +34,9 @@ export const ComposerToolbar = () => {
         disabled={isEmpty}
       >
         clear
+      </Button>
+      <Button onClick={() => rewindMessage()} disabled={isEmpty}>
+        rewind
       </Button>
     </Toolbar>
   );

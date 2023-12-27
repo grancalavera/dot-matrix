@@ -15,6 +15,7 @@ import {
   takeUntil,
 } from "rxjs";
 import { assertNever } from "../lib/assertNever";
+import { symbols } from "../symbol/model";
 import { symbol$, symbolChanged$ } from "../symbol/state";
 import {
   advancePlayhead,
@@ -25,26 +26,27 @@ import {
   screenFrequency,
   screenPixelValue,
 } from "./model";
-import { symbols } from "../symbol/model";
 
 export {
   clearMessage,
   pauseMessage,
   playMessage,
+  rewindMessage,
   setMessage,
   useIsEmptyMessage,
+  useIsPixelUnderPlayhead,
   useIsPlayingMessage,
   useMessage,
   useMessageCharCount,
   usePlayhead,
   useScreenBufferSymbol,
-  useIsPixelUnderPlayhead,
 };
 
 const [setMessage$, setMessage] = createSignal<string>();
 const [clear$, clearMessage] = createSignal();
 const [play$, playMessage] = createSignal();
 const [pause$, pauseMessage] = createSignal();
+const [rewind$, rewindMessage] = createSignal();
 
 const defaultMessage = symbols.join("");
 
@@ -81,20 +83,21 @@ const [useScreenBufferSymbol] = bind((index: number) =>
 );
 
 const [useIsPlayingMessage] = bind(
-  merge(play$.pipe(map(() => true)), pause$.pipe(map(() => false))).pipe(
-    startWith(false)
-  )
+  merge(
+    play$.pipe(map(() => true)),
+    merge(pause$, rewind$).pipe(map(() => false))
+  ).pipe(startWith(false))
 );
 
 const [usePlayhead, playhead$] = bind(
   mergeWithKey({
     advance$: play$.pipe(
       switchMap(() => {
-        const stop$ = merge(pause$, clear$);
+        const stop$ = merge(pause$, clear$, rewind$);
         return interval(screenFrequency).pipe(takeUntil(stop$));
       })
     ),
-    rewind$: clear$,
+    rewind$: merge(clear$, rewind$),
   }).pipe(
     scan(
       (playhead, signal) => (signal.type === "advance$" ? playhead + 1 : 0),
