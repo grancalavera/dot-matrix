@@ -9,10 +9,14 @@ import {
   screenSize,
   screenVector,
 } from "./model";
-import { usePlayhead, useScreenPixelValue } from "./state";
+import {
+  useIsPixelUnderPlayhead,
+  usePlayhead,
+  useScreenPixelValue,
+} from "./state";
+import { symbolSize } from "../symbol/model";
 
 export const Screen = () => {
-  const playhead = usePlayhead();
   return (
     <CenterLayout className="screen">
       <div>
@@ -21,21 +25,30 @@ export const Screen = () => {
             <Pixel key={pixelId} pixelId={pixelId} />
           ))}
         </GridLayout>
-        <p className="debug-view">
-          screen size: {screenSize}, buffer size: {bufferSize}, screen cols:{" "}
-          {screenCols}, screen rows: {screenRows}, playhead: {playhead}
-        </p>
+        <DebugView />
       </div>
     </CenterLayout>
   );
 };
 
+const DebugView = () => {
+  const playhead = usePlayhead();
+  return (
+    <p className="debug-view">
+      screen size: {screenSize}, buffer size: {bufferSize / symbolSize}, screen
+      cols: {screenCols}, screen rows: {screenRows}, playhead: {playhead}
+    </p>
+  );
+};
+
 const Pixel = (props: { pixelId: number }) => {
   const on = useScreenPixelValue(props.pixelId);
+  const playing = useIsPixelUnderPlayhead(props.pixelId);
   return (
     <div
       className={clsx("screen-pixel", {
         on,
+        playing,
       })}
     ></div>
   );

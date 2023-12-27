@@ -13,7 +13,6 @@ import {
   startWith,
   switchMap,
   takeUntil,
-  tap,
 } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { symbol$, symbolChanged$ } from "../symbol/state";
@@ -22,7 +21,11 @@ import {
   formatCharCount,
   isValidMessageLength,
   sanitizeMessage,
+  screenCharWidth,
+  screenFrequency,
+  screenPixelValue,
 } from "./model";
+import { symbols } from "../symbol/model";
 
 export {
   clearMessage,
@@ -31,17 +34,19 @@ export {
   setMessage,
   useIsEmptyMessage,
   useIsPlayingMessage,
-  useIsUnderPlayhead,
   useMessage,
   useMessageCharCount,
   usePlayhead,
   useScreenBufferSymbol,
+  useIsPixelUnderPlayhead,
 };
 
 const [setMessage$, setMessage] = createSignal<string>();
 const [clear$, clearMessage] = createSignal();
 const [play$, playMessage] = createSignal();
 const [pause$, pauseMessage] = createSignal();
+
+const defaultMessage = symbols.join("");
 
 const [useMessage, message$] = bind(
   mergeWithKey({ setMessage$, clear$ }).pipe(
@@ -58,8 +63,8 @@ const [useMessage, message$] = bind(
         default:
           assertNever(signal);
       }
-    }, ""),
-    startWith("")
+    }, defaultMessage),
+    startWith(defaultMessage)
   )
 );
 
@@ -86,7 +91,7 @@ const [usePlayhead, playhead$] = bind(
     advance$: play$.pipe(
       switchMap(() => {
         const stop$ = merge(pause$, clear$);
-        return interval(500).pipe(takeUntil(stop$));
+        return interval(screenFrequency).pipe(takeUntil(stop$));
       })
     ),
     rewind$: clear$,
@@ -100,7 +105,7 @@ const [usePlayhead, playhead$] = bind(
   )
 );
 
-const [useIsUnderPlayhead] = bind((index: number) =>
+const [useIsPixelUnderPlayhead] = bind((index: number) =>
   playhead$.pipe(map((playhead) => playhead === index))
 );
 
@@ -108,11 +113,13 @@ const buffer$ = state(
   combineLatest([message$, symbolChanged$.pipe(startWith(""))]).pipe(
     distinctUntilChanged(),
     switchMap(([message]) => {
-      const symbols = message.split("");
-
-      if (symbols.length === 0) {
+      if (message.length === 0) {
         return of([]);
       }
+
+      const symbols = message
+        .padEnd(message.length + screenCharWidth, " ")
+        .split("");
 
       return forkJoin(
         symbols.map((symbol) => symbol$(symbol).pipe(first()))
@@ -123,8 +130,8 @@ const buffer$ = state(
 );
 
 export const [useScreenPixelValue] = bind((index: number) =>
-  buffer$.pipe(
-    map((buffer) => buffer[index] ?? false),
+  combineLatest([buffer$, playhead$]).pipe(
+    map(([buffer, playhead]) => screenPixelValue(index, buffer, playhead)),
     startWith(false)
   )
 );

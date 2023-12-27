@@ -7,10 +7,14 @@ import {
 } from "../symbol/model";
 
 export const messageMaxLength = 80;
-export const screenCols = symbolCols * 8;
+export const screenCharWidth = 8;
+export const screenCols = symbolCols * screenCharWidth;
 export const screenRows = symbolRows;
 export const screenSize = screenCols * screenRows;
 export const bufferSize = symbolSize * messageMaxLength;
+
+export const screenFrequency = 80;
+const stepSize = screenRows;
 
 export const screenVector = Array.from({ length: screenSize }, (_, i) =>
   transposeIndex(i, screenRows, screenCols)
@@ -32,5 +36,10 @@ export const formatCharCount = (count: number) =>
 
 export const buffer = Array.from({ length: messageMaxLength }, (_, i) => i);
 
-export const advancePlayhead = (playhead: number) =>
-  (playhead * screenRows) % screenSize;
+export const advancePlayhead = (playhead: number) => playhead * stepSize;
+
+export const screenPixelValue = (
+  index: number,
+  buffer: boolean[],
+  playhead: number
+) => buffer[(index + playhead) % buffer.length] ?? false;

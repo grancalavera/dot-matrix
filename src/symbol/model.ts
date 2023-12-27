@@ -6,7 +6,7 @@ export const symbols = [
   "I", "J", "K", "L", "M", "N",
   "O", "P", "Q", "R", "S", "T", 
   "U", "V", "W", "X", "Y", "Z",
-   " ", "'", "!", "?"
+   " ", "'", "!", "?", "-"
 ]
 export const defaultSymbolId = symbols[0] ?? "Z";
 

@@ -8,6 +8,11 @@
   background-color: black;
 }
 
+.debug .screen-pixel.on.playing,
+.debug .screen-pixel.playing {
+  background-color: #f00;
+}
+
 .screen button {
   margin-top: 40px;
 }
