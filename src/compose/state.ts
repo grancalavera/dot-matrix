@@ -1,6 +1,7 @@
 import { bind, state } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import {
+  Observable,
   combineLatest,
   distinctUntilChanged,
   filter,
@@ -76,15 +77,12 @@ export const [useScreenBufferSymbol] = bind((index: number) =>
   message$.pipe(map((message) => message[index]))
 );
 
-const stop$ = merge(
-  pause$,
-  clear$,
-  rewind$,
-  message$.pipe(
-    filter((x) => x === ""),
-    map(() => undefined)
-  )
+const messageCleared$: Observable<void> = message$.pipe(
+  filter((message) => message === ""),
+  map(() => undefined)
 );
+
+const stop$ = merge(pause$, clear$, rewind$, messageCleared$);
 
 export const [useIsPlayingMessage] = bind(
   mergeWithKey({ play$, stop$ }).pipe(
@@ -98,7 +96,7 @@ export const [usePlayhead, playhead$] = bind(
     advance$: play$.pipe(
       switchMap(() => interval(screenFrequency).pipe(takeUntil(stop$)))
     ),
-    rewind$: merge(clear$, rewind$),
+    rewind$: merge(clear$, rewind$, messageCleared$),
   }).pipe(
     scan(
       (playhead, signal) => (signal.type === "advance$" ? playhead + 1 : 0),
