@@ -47,7 +47,7 @@ export const emptySymbol = (): SymbolData => {
 };
 
 export const defaultSymbolDescription = (
-  id = symbols[0] ?? "Z"
+  id = defaultSymbolId
 ): SymbolDescription => ({
   id,
   data: emptySymbol(),
