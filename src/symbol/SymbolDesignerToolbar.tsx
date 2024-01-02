@@ -9,17 +9,22 @@ import {
   invertSymbol,
   fillSymbol,
 } from "./state";
-import "./SymbolDesignerToolbar.css";
 
-export const SymbolDesignerToolbar = () => {
+export const SymbolDesignerToolbar = () => (
+  <Toolbar className="symbol-designer-toolbar">
+    <SymbolDesignerActions />
+  </Toolbar>
+);
+
+export const SymbolDesignerActions = () => {
   const { mutate } = useSaveSymbolMutation();
   const draft = useSymbolDraft();
   const draftIsEmpty = useIsSymbolDraftEmpty();
   const draftIsNotModified = !useIsSymbolDraftModified();
 
   return (
-    <Toolbar className="symbol-designer-toolbar">
-      <Button className="button-section" onClick={() => fillSymbol()}>
+    <>
+      <Button divider onClick={() => fillSymbol()}>
         fill
       </Button>
       <Button onClick={() => invertSymbol()}>invert</Button>
@@ -27,7 +32,7 @@ export const SymbolDesignerToolbar = () => {
         clear
       </Button>
       <Button
-        className="button-section"
+        divider
         onClick={() => resetSymbolEdits()}
         disabled={draftIsNotModified}
       >
@@ -40,6 +45,6 @@ export const SymbolDesignerToolbar = () => {
       >
         save
       </Button>
-    </Toolbar>
+    </>
   );
 };

@@ -1,9 +1,12 @@
-import { PropsWithChildren } from "react";
-import "./CenterLayout.css";
 import clsx from "clsx";
+import { HTMLProps } from "react";
+import "./CenterLayout.css";
 
-export const CenterLayout = (
-  props: PropsWithChildren<{ className?: string }>
-) => (
-  <div className={clsx("center-layout", props.className)}>{props.children}</div>
+export const CenterLayout = ({
+  className,
+  ...props
+}: HTMLProps<HTMLDivElement>) => (
+  <div {...props} className={clsx("center-layout", className)}>
+    {props.children}
+  </div>
 );

@@ -7,6 +7,13 @@ import "./ScreenBuffer.css";
 import { buffer, messageMaxLength } from "./model";
 import { useScreenBufferSymbol } from "./state";
 
+const quickEdit = (symbol: string) => {
+  const url = "/quick-edit/?s=" + encodeURIComponent(symbol);
+  const width = 450;
+  const height = 540;
+  window.open(url, "quick-edit", `width=${width},height=${height}`);
+};
+
 export const ScreenBuffer = () => (
   <div className="screen-buffer">
     <GridLayout
@@ -25,6 +32,10 @@ const BufferThumbnail = (props: { index: number }) => {
   const symbol = useScreenBufferSymbol(props.index);
   return (
     <CenterLayout
+      onClick={() => {
+        if (symbol === undefined) return;
+        quickEdit(symbol);
+      }}
       className={clsx("screen-buffer-thumbnail", {
         active: symbol !== undefined,
       })}

@@ -13,7 +13,6 @@ export const screenCols = symbolCols * screenWidthInChars;
 export const screenRows = symbolRows;
 export const screenSize = screenCols * screenRows;
 export const bufferSize = symbolSize * messageMaxLength;
-export const defaultMessage = "";
 export const screenFrequency = 80;
 const stepSize = screenRows;
 
@@ -50,3 +49,5 @@ export const bufferSymbols = (message: string): string[] =>
 export const bufferFromSymbolDescriptions = (
   symbols: SymbolDescription[]
 ): boolean[] => symbols.flatMap((symbol) => [...symbol.data.values()]);
+
+export const defaultMessage = sanitizeMessage("");

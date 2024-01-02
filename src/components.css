@@ -37,3 +37,11 @@ button.primary.disabled {
   color: #999;
   cursor: not-allowed;
 }
+
+button.button-section {
+  border-inline-start: 1px solid black;
+}
+
+.flexible-space {
+  flex: 1;
+}

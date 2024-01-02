@@ -1,6 +1,6 @@
 import { bind, state } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
-import { concat, first, map, merge, scan, startWith, switchMap } from "rxjs";
+import { map, merge, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
 import * as model from "./model";
@@ -35,8 +35,8 @@ export const [useSymbolDraft, symbolDraft$] = bind(
     symbol$: openSymbol$.pipe(
       startWith(model.defaultSymbolId),
       switchMap((id) => {
-        const read$ = service.symbol$(id).pipe(first());
-        return concat(read$, reset$.pipe(switchMap(() => read$)));
+        const read$ = service.symbol$(id);
+        return merge(read$, reset$.pipe(switchMap(() => read$)));
       })
     ),
   }).pipe(
@@ -69,6 +69,8 @@ export const [useSymbolDraft, symbolDraft$] = bind(
 export const [useIsSymbolSelected] = bind((id: string) =>
   symbolDraft$.pipe(map((draft) => draft.id === id))
 );
+
+export const [useSelectedSymbolId] = bind(symbolDraft$.pipe(map((x) => x.id)));
 
 export const [useIsSymbolDraftPixelOn] = bind((index: number) =>
   symbolDraft$.pipe(map((draft) => draft.data.get(index) ?? false))

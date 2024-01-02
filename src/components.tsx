@@ -11,6 +11,7 @@ type ButtonProps = {
   disabled?: boolean;
   onClick?: () => void;
   className?: string;
+  divider?: boolean;
 };
 
 export const Button = ({
@@ -18,6 +19,7 @@ export const Button = ({
   children,
   onClick,
   disabled,
+  divider,
   className,
 }: PropsWithChildren<ButtonProps>) => (
   <button
@@ -25,8 +27,14 @@ export const Button = ({
       if (disabled) return;
       onClick?.();
     }}
-    className={clsx(className, { primary, disabled })}
+    className={clsx(className, {
+      primary,
+      disabled,
+      ["button-section"]: divider,
+    })}
   >
     {children}
   </button>
 );
+
+export const FlexibleSpace = () => <div className="flexible-space" />;

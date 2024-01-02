@@ -2,7 +2,12 @@ import clsx from "clsx";
 import { GridLayout } from "../layout/GridLayout";
 import "./SymbolEditorThumbnails.css";
 import { symbolCols, symbolRows, symbolVector, symbols } from "./model";
-import { editSymbol, useSymbolPixelValue, useIsSymbolSelected } from "./state";
+import {
+  editSymbol,
+  useSymbolPixelValue,
+  useIsSymbolSelected,
+  useSelectedSymbolId,
+} from "./state";
 
 export const SymbolEditorThumbnails = () => (
   <GridLayout rows={6} cols={6} gap={{ rowGap: 10, columnGap: 4 }}>
@@ -11,6 +16,11 @@ export const SymbolEditorThumbnails = () => (
     ))}
   </GridLayout>
 );
+
+export const SelectedSymbolThumbnail = () => {
+  const symbol = useSelectedSymbolId();
+  return <SymbolThumbnail symbol={symbol} />;
+};
 
 type SymbolThumbnailProps = {
   symbol: string;

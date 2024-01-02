@@ -26,6 +26,7 @@ const MessageLengthMonitor = () => <p>{useMessageCharCount()}</p>;
 const MessageInput = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const message = useMessage();
+  const isPlaying = useIsPlayingMessage();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { selectionStart, selectionEnd } = e.target;
@@ -45,6 +46,16 @@ const MessageInput = () => {
       placeholder={"..."}
       value={message}
       onChange={handleChange}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (isPlaying) {
+            pauseMessage();
+          } else {
+            playMessage();
+          }
+        }
+      }}
     />
   );
 };

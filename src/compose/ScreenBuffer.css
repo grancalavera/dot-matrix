@@ -22,6 +22,8 @@
 }
 
 .screen-buffer-thumbnail.active {
+  cursor: zoom-in;
+
   &:hover {
     border-color: black;
   }
