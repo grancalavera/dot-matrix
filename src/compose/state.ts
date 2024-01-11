@@ -47,12 +47,12 @@ export { rewindMessage };
 
 export const [useMessage, message$] = bind(
   mergeWithKey({ setMessage$, clear$ }).pipe(
-    scan((buffer, signal) => {
+    scan((message, signal) => {
       switch (signal.type) {
         case "setMessage$": {
           return isValidMessageLength(signal.payload)
             ? sanitizeMessage(signal.payload)
-            : buffer;
+            : message;
         }
         case "clear$": {
           return "";
