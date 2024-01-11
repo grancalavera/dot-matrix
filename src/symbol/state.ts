@@ -35,8 +35,9 @@ export const [useSymbolDraft, symbolDraft$] = bind(
     symbol$: openSymbol$.pipe(
       startWith(model.defaultSymbolId),
       switchMap((id) => {
-        const read$ = service.symbol$(id);
-        return merge(read$, reset$.pipe(switchMap(() => read$)));
+        const load$ = service.symbol$(id);
+        const reload$ = reset$.pipe(switchMap(() => load$));
+        return merge(load$, reload$);
       })
     ),
   }).pipe(
