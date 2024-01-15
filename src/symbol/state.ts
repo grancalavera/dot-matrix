@@ -1,8 +1,19 @@
 import { bind, state } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
-import { map, merge, scan, startWith, switchMap } from "rxjs";
+import {
+  defer,
+  firstValueFrom,
+  interval,
+  map,
+  merge,
+  scan,
+  startWith,
+  switchMap,
+} from "rxjs";
+import * as aiService from "../ai/service";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
+import { coinFlip, randomInt } from "../lib/random";
 import * as model from "./model";
 import * as service from "./service";
 
@@ -51,6 +62,8 @@ export { flipSymbolV };
 
 const [rotate$, rotateSymbol] = createSignal();
 export { rotateSymbol };
+
+const [isPredicting$, setIsPredicting] = createSignal<boolean>();
 
 export const [useSymbol, symbol$] = bind(service.symbol$);
 
@@ -142,8 +155,24 @@ export const [useIsSymbolSelected] = bind((id: string) =>
 
 export const [useSelectedSymbolId] = bind(symbolDraft$.pipe(map((x) => x.id)));
 
-export const [useIsSymbolDraftPixelOn] = bind((index: number) =>
-  symbolDraft$.pipe(map((draft) => draft.data.get(index) ?? false))
+export const [useSymbolDraftPixelValue] = bind((index: number) =>
+  defer(() => {
+    const random = () => coinFlip(0.3);
+
+    const randomValue$ = interval(randomInt(100, 500)).pipe(
+      map(random),
+      startWith(random())
+    );
+
+    const actualValue$ = symbolDraft$.pipe(
+      map((draft) => draft.data.get(index) ?? false)
+    );
+
+    return isPredicting$.pipe(
+      startWith(false),
+      switchMap((isPredicting) => (isPredicting ? randomValue$ : actualValue$))
+    );
+  })
 );
 
 export const [useSymbolPixelValue] = bind((id: string, index: number) => {
@@ -176,3 +205,16 @@ export const symbolChanged$ = state(
     map((symbol) => symbol.id)
   )
 );
+
+export const usePredictSymbolMutation = () =>
+  useMutation(async (symbol: string): Promise<model.SymbolDescription> => {
+    setIsPredicting(true);
+    let prediction = await firstValueFrom(symbol$(symbol));
+    try {
+      prediction = await aiService.predict(symbol);
+    } catch (error) {
+      console.warn("prediction failed:", { symbol, error });
+    }
+    setIsPredicting(false);
+    return prediction;
+  });

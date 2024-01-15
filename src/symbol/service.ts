@@ -1,8 +1,9 @@
 import { createSignal } from "@react-rxjs/utils";
 import memoize from "lodash/memoize";
-import { concat, defer, filter, map, of } from "rxjs";
-import { SymbolDescription, emptySymbol } from "./model";
 import { nanoid } from "nanoid";
+import { concat, defer, filter, map, of } from "rxjs";
+import { fromBinaryString, toBinaryString } from "./mapper";
+import { SymbolDescription, emptySymbol } from "./model";
 
 const clientId = nanoid(4);
 
@@ -41,23 +42,14 @@ const loadSymbol = (id: string): SymbolDescription => {
     return { id, data: emptySymbol() };
   }
 
-  const data = new Map<number, boolean>();
-  for (let i = 0; i < binaryString.length; i++) {
-    data.set(i, binaryString[i] === "1");
-  }
-
-  return { id, data };
+  return fromBinaryString(id, binaryString);
 };
 
 export const saveSymbol = async ({
   id,
   data,
 }: SymbolDescription): Promise<void> => {
-  let binaryString = "";
-  for (let i = 0; i < data.size; i++) {
-    binaryString += data.get(i) ? "1" : "0";
-  }
-  localStorage.setItem(id, binaryString);
+  localStorage.setItem(id, toBinaryString(data));
   invalidate(id);
   broadcastSymbolChange(id);
 };

@@ -1,19 +1,21 @@
 import { Button, Toolbar } from "../components";
+import { isLoading } from "../lib/result";
 import {
   clearSymbolDraft,
-  resetSymbolEdits,
-  useIsSymbolDraftEmpty,
-  useIsSymbolDraftModified,
-  useSaveSymbolMutation,
-  useSymbolDraft,
-  invertSymbol,
-  fillSymbol,
   copySymbol,
-  replaceSymbol,
-  pasteSymbol,
+  fillSymbol,
   flipSymbolH,
   flipSymbolV,
+  invertSymbol,
+  pasteSymbol,
+  replaceSymbol,
+  resetSymbolEdits,
   rotateSymbol,
+  useIsSymbolDraftEmpty,
+  useIsSymbolDraftModified,
+  usePredictSymbolMutation,
+  useSaveSymbolMutation,
+  useSymbolDraft,
 } from "./state";
 
 export const SymbolDesignerToolbar = () => (
@@ -23,13 +25,19 @@ export const SymbolDesignerToolbar = () => (
 );
 
 export const SymbolDesignerActions = () => {
-  const { mutate } = useSaveSymbolMutation();
+  const { mutate: save } = useSaveSymbolMutation();
+  const { mutate: predict, result: predictResult } = usePredictSymbolMutation();
+
   const draft = useSymbolDraft();
   const draftIsEmpty = useIsSymbolDraftEmpty();
   const draftIsNotModified = !useIsSymbolDraftModified();
+  const isPredicting = isLoading(predictResult);
 
   return (
     <>
+      <Button divider onClick={() => predict(draft.id)} disabled={isPredicting}>
+        ai
+      </Button>
       <Button divider onClick={() => copySymbol()}>
         c
       </Button>
@@ -50,13 +58,13 @@ export const SymbolDesignerActions = () => {
       <Button
         divider
         onClick={() => resetSymbolEdits()}
-        disabled={draftIsNotModified}
+        disabled={draftIsNotModified || isPredicting}
       >
         reset
       </Button>
       <Button
-        onClick={() => mutate(draft)}
-        disabled={draftIsNotModified}
+        onClick={() => save(draft)}
+        disabled={draftIsNotModified || isPredicting}
         primary
       >
         save
