@@ -1,13 +1,17 @@
+import { useEffect } from "react";
 import { Button, Toolbar } from "../components";
+import { isLoading, isSuccess } from "../lib/result";
 import {
   clearSymbolDraft,
+  fillSymbol,
+  invertSymbol,
+  replaceSymbolDraft,
   resetSymbolEdits,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
+  usePredictSymbolMutation,
   useSaveSymbolMutation,
   useSymbolDraft,
-  invertSymbol,
-  fillSymbol,
 } from "./state";
 
 export const SymbolDesignerToolbar = () => (
@@ -17,30 +21,47 @@ export const SymbolDesignerToolbar = () => (
 );
 
 export const SymbolDesignerActions = () => {
-  const { mutate } = useSaveSymbolMutation();
+  const { mutate: save } = useSaveSymbolMutation();
+  const { mutate: predict, result: predictResult } = usePredictSymbolMutation();
+
   const draft = useSymbolDraft();
   const draftIsEmpty = useIsSymbolDraftEmpty();
   const draftIsNotModified = !useIsSymbolDraftModified();
+  const isPredicting = isLoading(predictResult);
+
+  useEffect(() => {
+    if (isSuccess(predictResult)) {
+      replaceSymbolDraft(predictResult.data);
+    }
+  }, [predictResult]);
 
   return (
     <>
-      <Button divider onClick={() => fillSymbol()}>
+      <Button divider onClick={() => predict(draft.id)} disabled={isPredicting}>
+        ai
+      </Button>
+      <Button divider onClick={() => fillSymbol()} disabled={isPredicting}>
         fill
       </Button>
-      <Button onClick={() => invertSymbol()}>invert</Button>
-      <Button onClick={() => clearSymbolDraft()} disabled={draftIsEmpty}>
+      <Button onClick={() => invertSymbol()} disabled={isPredicting}>
+        invert
+      </Button>
+      <Button
+        onClick={() => clearSymbolDraft()}
+        disabled={draftIsEmpty || isPredicting}
+      >
         clear
       </Button>
       <Button
         divider
         onClick={() => resetSymbolEdits()}
-        disabled={draftIsNotModified}
+        disabled={draftIsNotModified || isPredicting}
       >
         reset
       </Button>
       <Button
-        onClick={() => mutate(draft)}
-        disabled={draftIsNotModified}
+        onClick={() => save(draft)}
+        disabled={draftIsNotModified || isPredicting}
         primary
       >
         save

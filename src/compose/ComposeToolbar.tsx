@@ -3,6 +3,7 @@ import { Button, Toolbar } from "../components";
 import "./ComposeToolbar.css";
 import {
   clearMessage,
+  invertMessage,
   pauseMessage,
   playMessage,
   rewindMessage,
@@ -84,6 +85,9 @@ const MessageActions = () => {
       </Button>
       <Button onClick={() => rewindMessage()} disabled={isEmpty}>
         rewind
+      </Button>
+      <Button onClick={() => invertMessage()} disabled={isEmpty}>
+        invert
       </Button>
     </>
   );
