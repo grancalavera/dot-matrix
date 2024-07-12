@@ -11,6 +11,9 @@ import {
   copySymbol,
   replaceSymbol,
   pasteSymbol,
+  flipSymbolH,
+  flipSymbolV,
+  rotateSymbol,
 } from "./state";
 
 export const SymbolDesignerToolbar = () => (
@@ -28,16 +31,21 @@ export const SymbolDesignerActions = () => {
   return (
     <>
       <Button divider onClick={() => copySymbol()}>
-        copy
+        c
       </Button>
-      <Button onClick={() => pasteSymbol()}>paste</Button>
-      <Button onClick={() => replaceSymbol()}>replace</Button>
+      <Button onClick={() => pasteSymbol()}>p</Button>
+      <Button onClick={() => replaceSymbol()}>r</Button>
+      <Button divider onClick={() => flipSymbolH()}>
+        h
+      </Button>
+      <Button onClick={() => flipSymbolV()}>v</Button>
+      <Button onClick={() => rotateSymbol()}>r</Button>
       <Button divider onClick={() => fillSymbol()}>
-        fill
+        f
       </Button>
-      <Button onClick={() => invertSymbol()}>invert</Button>
+      <Button onClick={() => invertSymbol()}>i</Button>
       <Button onClick={() => clearSymbolDraft()} disabled={draftIsEmpty}>
-        clear
+        c
       </Button>
       <Button
         divider

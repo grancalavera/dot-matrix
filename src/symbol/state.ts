@@ -43,6 +43,15 @@ export { replaceSymbol };
 const [paste$, pasteSymbol] = createSignal();
 export { pasteSymbol };
 
+const [flipH$, flipSymbolH] = createSignal();
+export { flipSymbolH };
+
+const [flipV$, flipSymbolV] = createSignal();
+export { flipSymbolV };
+
+const [rotate$, rotateSymbol] = createSignal();
+export { rotateSymbol };
+
 export const [useSymbol, symbol$] = bind(service.symbol$);
 
 const state$ = state(
@@ -62,6 +71,9 @@ const state$ = state(
     copy$,
     replace$,
     paste$,
+    flipH$,
+    flipV$,
+    rotate$,
   }).pipe(
     scan((current, signal) => {
       const draft = current.draft;
@@ -102,6 +114,15 @@ const state$ = state(
               data: model.merge(draft.data, current.clipboard),
             },
           };
+        }
+        case "flipH$": {
+          return { ...current, draft: model.horizontalFlipSymbol(draft) };
+        }
+        case "flipV$": {
+          return { ...current, draft: model.verticalFlipSymbol(draft) };
+        }
+        case "rotate$": {
+          return { ...current, draft: model.rotate180Symbol(draft) };
         }
         default: {
           assertNever(signal);

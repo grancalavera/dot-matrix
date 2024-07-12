@@ -30,14 +30,26 @@ export const transposeIndex = (
   return col * rows + row;
 };
 
+export const symbolIndexToRowMajor = (i: number) =>
+  transposeIndex(i, symbolCols, symbolRows);
+
+export const symbolIndexToColMajor = (i: number) =>
+  transposeIndex(i, symbolRows, symbolCols);
+
+const colMajorIndexCoordiantes = (i: number) => {
+  const row = i % symbolRows;
+  const col = Math.floor(i / symbolRows);
+  return { row, col };
+};
+
 /**
  * A column major vector of indices for a 2D matrix of size `symbolRows` x `symbolCols`.
  * we render the pixels in row-major order, but we store them in column-major order, so
  * we need to transpose the index.
  */
-export const symbolVector = Array.from({ length: symbolSize }, (_, i) => {
-  return transposeIndex(i, symbolRows, symbolCols);
-});
+export const symbolVector = Array.from({ length: symbolSize }, (_, i) =>
+  symbolIndexToColMajor(i)
+);
 
 export const emptySymbol = (): SymbolData => {
   const symbol = new Map<number, boolean>();
@@ -89,3 +101,32 @@ export const merge = (base: SymbolData, merged: SymbolData): SymbolData => {
   );
   return symbol;
 };
+
+export const verticalFlipSymbol = (
+  symbol: SymbolDescription
+): SymbolDescription => {
+  const data = new Map<number, boolean>();
+  symbol.data.forEach((value, key) => {
+    const coords = colMajorIndexCoordiantes(key);
+    const flippedRow = symbolRows - 1 - coords.row;
+    const index = coords.col * symbolRows + flippedRow;
+    data.set(index, value);
+  });
+  return { ...symbol, data };
+};
+
+export const horizontalFlipSymbol = (
+  symbol: SymbolDescription
+): SymbolDescription => {
+  const data = new Map<number, boolean>();
+  symbol.data.forEach((value, key) => {
+    const coords = colMajorIndexCoordiantes(key);
+    const flippedCol = symbolCols - 1 - coords.col;
+    const index = flippedCol * symbolRows + coords.row;
+    data.set(index, value);
+  });
+  return { ...symbol, data };
+};
+
+export const rotate180Symbol = (symbol: SymbolDescription): SymbolDescription =>
+  verticalFlipSymbol(horizontalFlipSymbol(symbol));
