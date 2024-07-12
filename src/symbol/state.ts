@@ -6,6 +6,16 @@ import { useMutation } from "../lib/mutation";
 import * as model from "./model";
 import * as service from "./service";
 
+type SymbolState = {
+  draft: model.SymbolDescription;
+  clipboard: model.SymbolData;
+};
+
+const defaultState: SymbolState = {
+  draft: model.defaultSymbolDescription(),
+  clipboard: model.emptySymbol(),
+};
+
 const [openSymbol$, editSymbol] = createSignal<string>();
 export { editSymbol };
 
@@ -24,9 +34,15 @@ export { invertSymbol };
 const [fill$, fillSymbol] = createSignal();
 export { fillSymbol };
 
+const [copy$, copySymbol] = createSignal();
+export { copySymbol };
+
+const [paste$, pasteSymbol] = createSignal();
+export { pasteSymbol };
+
 export const [useSymbol, symbol$] = bind(service.symbol$);
 
-export const [useSymbolDraft, symbolDraft$] = bind(
+const state$ = state(
   mergeWithKey({
     togglePixel$,
     clear$,
@@ -40,31 +56,50 @@ export const [useSymbolDraft, symbolDraft$] = bind(
         return merge(load$, reload$);
       })
     ),
+    copy$,
+    paste$,
   }).pipe(
-    scan((draft, signal) => {
+    scan((current, signal) => {
+      const draft = current.draft;
       switch (signal.type) {
         case "togglePixel$": {
           draft.data.set(signal.payload, !draft.data.get(signal.payload));
-          return draft;
+          return { ...current, draft };
         }
         case "clear$": {
-          return model.defaultSymbolDescription(draft.id);
+          return {
+            ...current,
+            draft: model.defaultSymbolDescription(draft.id),
+          };
         }
         case "symbol$": {
-          return signal.payload;
+          return { ...current, draft: signal.payload };
         }
         case "invert$": {
-          return model.invertSymbol(draft);
+          return { ...current, draft: model.invertSymbol(draft) };
         }
         case "fill$": {
-          return model.fillSymbol(draft);
+          return { ...current, draft: model.fillSymbol(draft) };
+        }
+        case "copy$": {
+          return { ...current, clipboard: model.clone(draft.data) };
+        }
+        case "paste$": {
+          return {
+            ...current,
+            draft: { ...draft, data: model.clone(current.clipboard) },
+          };
         }
         default: {
           assertNever(signal);
         }
       }
-    }, model.defaultSymbolDescription())
+    }, defaultState)
   )
+);
+
+export const [useSymbolDraft, symbolDraft$] = bind(
+  state$.pipe(map((state) => state.draft))
 );
 
 export const [useIsSymbolSelected] = bind((id: string) =>

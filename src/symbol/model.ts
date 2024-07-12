@@ -75,3 +75,9 @@ export const fillSymbol = (symbol: SymbolDescription): SymbolDescription => {
   symbol.data.forEach((_, key) => symbol.data.set(key, true));
   return symbol;
 };
+
+export const clone = (data: SymbolData) => {
+  const symbol = new Map<number, boolean>();
+  data.forEach((value, key) => symbol.set(key, value));
+  return symbol;
+};

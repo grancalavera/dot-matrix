@@ -8,6 +8,8 @@ import {
   useSymbolDraft,
   invertSymbol,
   fillSymbol,
+  copySymbol,
+  pasteSymbol,
 } from "./state";
 
 export const SymbolDesignerToolbar = () => (
@@ -24,6 +26,10 @@ export const SymbolDesignerActions = () => {
 
   return (
     <>
+      <Button divider onClick={() => copySymbol()}>
+        copy
+      </Button>
+      <Button onClick={() => pasteSymbol()}>paste</Button>
       <Button divider onClick={() => fillSymbol()}>
         fill
       </Button>
