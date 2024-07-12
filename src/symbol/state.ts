@@ -37,6 +37,9 @@ export { fillSymbol };
 const [copy$, copySymbol] = createSignal();
 export { copySymbol };
 
+const [replace$, replaceSymbol] = createSignal();
+export { replaceSymbol };
+
 const [paste$, pasteSymbol] = createSignal();
 export { pasteSymbol };
 
@@ -57,6 +60,7 @@ const state$ = state(
       })
     ),
     copy$,
+    replace$,
     paste$,
   }).pipe(
     scan((current, signal) => {
@@ -84,10 +88,19 @@ const state$ = state(
         case "copy$": {
           return { ...current, clipboard: model.clone(draft.data) };
         }
-        case "paste$": {
+        case "replace$": {
           return {
             ...current,
             draft: { ...draft, data: model.clone(current.clipboard) },
+          };
+        }
+        case "paste$": {
+          return {
+            ...current,
+            draft: {
+              ...draft,
+              data: model.merge(draft.data, current.clipboard),
+            },
           };
         }
         default: {

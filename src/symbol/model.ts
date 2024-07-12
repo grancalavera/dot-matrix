@@ -81,3 +81,11 @@ export const clone = (data: SymbolData) => {
   data.forEach((value, key) => symbol.set(key, value));
   return symbol;
 };
+
+export const merge = (base: SymbolData, merged: SymbolData): SymbolData => {
+  const symbol = new Map<number, boolean>();
+  base.forEach((orinalValue, key) =>
+    symbol.set(key, merged.get(key) || orinalValue)
+  );
+  return symbol;
+};

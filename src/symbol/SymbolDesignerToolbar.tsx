@@ -9,6 +9,7 @@ import {
   invertSymbol,
   fillSymbol,
   copySymbol,
+  replaceSymbol,
   pasteSymbol,
 } from "./state";
 
@@ -30,6 +31,7 @@ export const SymbolDesignerActions = () => {
         copy
       </Button>
       <Button onClick={() => pasteSymbol()}>paste</Button>
+      <Button onClick={() => replaceSymbol()}>replace</Button>
       <Button divider onClick={() => fillSymbol()}>
         fill
       </Button>
