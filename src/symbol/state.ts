@@ -20,11 +20,13 @@ import * as service from "./service";
 type SymbolState = {
   draft: model.SymbolDescription;
   clipboard: model.SymbolData;
+  isPredicting: boolean;
 };
 
 const defaultState: SymbolState = {
   draft: model.defaultSymbolDescription(),
   clipboard: model.emptySymbol(),
+  isPredicting: false,
 };
 
 const [openSymbol$, editSymbol] = createSignal<string>();
@@ -90,6 +92,7 @@ const state$ = state(
   }).pipe(
     scan((current, signal) => {
       const draft = current.draft;
+
       switch (signal.type) {
         case "togglePixel$": {
           draft.data.set(signal.payload, !draft.data.get(signal.payload));
