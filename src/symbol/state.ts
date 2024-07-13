@@ -1,16 +1,6 @@
 import { bind, state } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
-import {
-  defer,
-  firstValueFrom,
-  interval,
-  map,
-  merge,
-  scan,
-  startWith,
-  switchMap,
-} from "rxjs";
-import * as aiService from "../ai/service";
+import { defer, interval, map, merge, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
 import { coinFlip, randomInt } from "../lib/random";
@@ -66,6 +56,11 @@ const [rotate$, rotateSymbol] = createSignal();
 export { rotateSymbol };
 
 const [isPredicting$, setIsPredicting] = createSignal<boolean>();
+
+const [useIsPredicting] = bind(isPredicting$);
+export { useIsPredicting };
+
+export const predictSymbol = (id: string) => {};
 
 export const [useSymbol, symbol$] = bind(service.symbol$);
 
@@ -208,16 +203,3 @@ export const symbolChanged$ = state(
     map((symbol) => symbol.id)
   )
 );
-
-export const usePredictSymbolMutation = () =>
-  useMutation(async (symbol: string): Promise<model.SymbolDescription> => {
-    setIsPredicting(true);
-    let prediction = await firstValueFrom(symbol$(symbol));
-    try {
-      prediction = await aiService.predict(symbol);
-    } catch (error) {
-      console.warn("prediction failed:", { symbol, error });
-    }
-    setIsPredicting(false);
-    return prediction;
-  });

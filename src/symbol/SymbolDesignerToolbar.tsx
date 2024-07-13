@@ -1,5 +1,4 @@
 import { Button, Toolbar } from "../components";
-import { isLoading } from "../lib/result";
 import {
   clearSymbolDraft,
   copySymbol,
@@ -8,12 +7,13 @@ import {
   flipSymbolV,
   invertSymbol,
   pasteSymbol,
+  predictSymbol,
   replaceSymbol,
   resetSymbolEdits,
   rotateSymbol,
+  useIsPredicting,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
-  usePredictSymbolMutation,
   useSaveSymbolMutation,
   useSymbolDraft,
 } from "./state";
@@ -26,16 +26,19 @@ export const SymbolDesignerToolbar = () => (
 
 export const SymbolDesignerActions = () => {
   const { mutate: save } = useSaveSymbolMutation();
-  const { mutate: predict, result: predictResult } = usePredictSymbolMutation();
 
   const draft = useSymbolDraft();
   const draftIsEmpty = useIsSymbolDraftEmpty();
   const draftIsNotModified = !useIsSymbolDraftModified();
-  const isPredicting = isLoading(predictResult);
+  const isPredicting = useIsPredicting();
 
   return (
     <>
-      <Button divider onClick={() => predict(draft.id)} disabled={isPredicting}>
+      <Button
+        divider
+        onClick={() => predictSymbol(draft.id)}
+        disabled={isPredicting}
+      >
         ai
       </Button>
       <Button divider onClick={() => copySymbol()}>
