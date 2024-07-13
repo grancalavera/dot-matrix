@@ -4,9 +4,10 @@ import "./CenterLayout.css";
 
 export const CenterLayout = ({
   className,
+  children,
   ...props
 }: HTMLProps<HTMLDivElement>) => (
   <div {...props} className={clsx("center-layout", className)}>
-    {props.children}
+    {children}
   </div>
 );

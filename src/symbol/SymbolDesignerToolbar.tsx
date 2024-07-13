@@ -1,19 +1,21 @@
 import { Button, Toolbar } from "../components";
 import {
   clearSymbolDraft,
+  copySymbol,
+  fillSymbol,
+  flipSymbolH,
+  flipSymbolV,
+  invertSymbol,
+  pasteSymbol,
+  predictSymbol,
+  replaceSymbol,
   resetSymbolEdits,
+  rotateSymbol,
+  useIsPredicting,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
   useSaveSymbolMutation,
   useSymbolDraft,
-  invertSymbol,
-  fillSymbol,
-  copySymbol,
-  replaceSymbol,
-  pasteSymbol,
-  flipSymbolH,
-  flipSymbolV,
-  rotateSymbol,
 } from "./state";
 
 export const SymbolDesignerToolbar = () => (
@@ -23,13 +25,24 @@ export const SymbolDesignerToolbar = () => (
 );
 
 export const SymbolDesignerActions = () => {
-  const { mutate } = useSaveSymbolMutation();
+  const { mutate: save } = useSaveSymbolMutation();
+
   const draft = useSymbolDraft();
   const draftIsEmpty = useIsSymbolDraftEmpty();
   const draftIsNotModified = !useIsSymbolDraftModified();
+  const isPredicting = useIsPredicting();
 
   return (
     <>
+      {import.meta.env.VITE_OPENAI_API_KEY && (
+        <Button
+          divider
+          onClick={() => predictSymbol(draft.id)}
+          disabled={isPredicting}
+        >
+          ai
+        </Button>
+      )}
       <Button divider onClick={() => copySymbol()}>
         c
       </Button>
@@ -50,13 +63,13 @@ export const SymbolDesignerActions = () => {
       <Button
         divider
         onClick={() => resetSymbolEdits()}
-        disabled={draftIsNotModified}
+        disabled={draftIsNotModified || isPredicting}
       >
         reset
       </Button>
       <Button
-        onClick={() => mutate(draft)}
-        disabled={draftIsNotModified}
+        onClick={() => save(draft)}
+        disabled={draftIsNotModified || isPredicting}
         primary
       >
         save

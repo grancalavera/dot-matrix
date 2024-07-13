@@ -45,6 +45,9 @@ export { pauseMessage };
 const [rewind$, rewindMessage] = createSignal();
 export { rewindMessage };
 
+const [invert$, invertMessage] = createSignal();
+export { invertMessage };
+
 export const [useMessage, message$] = bind(
   mergeWithKey({ setMessage$, clear$ }).pipe(
     scan((message, signal) => {
@@ -124,8 +127,18 @@ const buffer$ = state(
 );
 
 export const [useScreenPixelValue] = bind((index: number) =>
-  combineLatest([buffer$, playhead$]).pipe(
-    map(([buffer, playhead]) => screenPixelValue(index, buffer, playhead)),
+  combineLatest([
+    buffer$,
+    playhead$,
+    invert$.pipe(
+      scan((value) => !value, false),
+      startWith(false)
+    ),
+  ]).pipe(
+    map(([buffer, playhead, invert]) => {
+      const value = screenPixelValue(index, buffer, playhead);
+      return invert ? !value : value;
+    }),
     startWith(false)
   )
 );
