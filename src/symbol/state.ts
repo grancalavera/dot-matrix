@@ -3,6 +3,7 @@ import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import {
   catchError,
   defer,
+  first,
   from,
   interval,
   map,
@@ -12,12 +13,12 @@ import {
   startWith,
   switchMap,
 } from "rxjs";
+import * as aiService from "../ai/service";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
 import { coinFlip, randomInt } from "../lib/random";
 import * as model from "./model";
 import * as symbolService from "./service";
-import * as aiService from "../ai/service";
 
 type SymbolState = {
   draft: model.SymbolDescription;
@@ -72,38 +73,42 @@ export { predictSymbol };
 
 export const [useSymbol, symbol$] = bind(symbolService.symbol$);
 
+const loadSymbol$ = openSymbol$.pipe(
+  startWith(model.defaultSymbolId),
+  switchMap((id) => {
+    const load$ = symbolService.symbol$(id);
+    const reload$ = reset$.pipe(switchMap(() => load$));
+    return merge(load$, reload$);
+  })
+);
+
+const predictionResult$ = predict$.pipe(
+  switchMap((id) => symbol$(id).pipe(first())),
+  switchMap((symbol) =>
+    from(aiService.predict(symbol.id)).pipe(
+      catchError((error) => {
+        console.warn("prediction failed:", { symbol: symbol, error });
+        return of(symbol);
+      })
+    )
+  )
+);
+
 const state$ = state(
   mergeWithKey({
     togglePixel$,
     clear$,
     invert$,
     fill$,
-    symbol$: openSymbol$.pipe(
-      startWith(model.defaultSymbolId),
-      switchMap((id) => {
-        const load$ = symbolService.symbol$(id);
-        const reload$ = reset$.pipe(switchMap(() => load$));
-        return merge(load$, reload$);
-      })
-    ),
+    loadSymbol$,
     copy$,
     replace$,
     paste$,
     flipH$,
     flipV$,
     rotate$,
-    beginPrediction$: predict$,
-    endPrediction$: predict$.pipe(
-      switchMap((id) => symbol$(id)),
-      switchMap((fallback) =>
-        from(aiService.predict(fallback.id)).pipe(
-          catchError((error) => {
-            console.warn("prediction failed:", { symbol: fallback, error });
-            return of(fallback);
-          })
-        )
-      )
-    ),
+    predict$,
+    predictionResult$,
   }).pipe(
     scan((current, signal) => {
       const draft = current.draft;
@@ -119,7 +124,7 @@ const state$ = state(
             draft: model.defaultSymbolDescription(draft.id),
           };
         }
-        case "symbol$": {
+        case "loadSymbol$": {
           return { ...current, draft: signal.payload };
         }
         case "invert$": {
@@ -155,10 +160,10 @@ const state$ = state(
         case "rotate$": {
           return { ...current, draft: model.rotate180Symbol(draft) };
         }
-        case "beginPrediction$": {
+        case "predict$": {
           return { ...current, isPredicting: true };
         }
-        case "endPrediction$": {
+        case "predictionResult$": {
           return { ...current, draft: signal.payload, isPredicting: false };
         }
         default: {
