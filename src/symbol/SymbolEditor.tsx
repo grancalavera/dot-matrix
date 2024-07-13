@@ -1,7 +1,12 @@
 import clsx from "clsx";
 import { GridLayout } from "../layout/GridLayout";
 import "./SymbolEditor.css";
-import { symbolCols, symbolRows, symbolVector } from "./model";
+import {
+  symbolIndexToRowMajor,
+  symbolCols,
+  symbolRows,
+  symbolVector,
+} from "./model";
 import { toggleSymbolPixel, useIsSymbolDraftPixelOn } from "./state";
 
 export const SymbolEditor = () => (
@@ -19,7 +24,9 @@ const SymbolEditorPixel = (props: { pixelId: number }) => {
       className={clsx("symbol-editor-pixel", { on })}
       onClick={() => toggleSymbolPixel(props.pixelId)}
     >
-      <pre className="debug-view">{props.pixelId}</pre>
+      <pre className="debug-view">
+        {props.pixelId}_{symbolIndexToRowMajor(props.pixelId)}
+      </pre>
     </div>
   );
 };
