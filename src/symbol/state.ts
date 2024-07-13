@@ -22,13 +22,12 @@ import * as symbolService from "./service";
 
 type SymbolState = {
   draft: model.SymbolDescription;
-  clipboard: model.SymbolData;
+  clipboard?: model.SymbolData;
   isPredicting: boolean;
 };
 
 const defaultState: SymbolState = {
   draft: model.defaultSymbolDescription(),
-  clipboard: model.emptySymbol(),
   isPredicting: false,
 };
 
@@ -113,6 +112,10 @@ const state$ = state(
     scan((current, signal) => {
       const draft = current.draft;
 
+      if (signal.type !== "predictionResult$" && current.isPredicting) {
+        return current;
+      }
+
       switch (signal.type) {
         case "togglePixel$": {
           draft.data.set(signal.payload, !draft.data.get(signal.payload));
@@ -137,12 +140,20 @@ const state$ = state(
           return { ...current, clipboard: model.clone(draft.data) };
         }
         case "replace$": {
+          if (!current.clipboard) {
+            return current;
+          }
+
           return {
             ...current,
             draft: { ...draft, data: model.clone(current.clipboard) },
           };
         }
         case "paste$": {
+          if (!current.clipboard) {
+            return current;
+          }
+
           return {
             ...current,
             draft: {

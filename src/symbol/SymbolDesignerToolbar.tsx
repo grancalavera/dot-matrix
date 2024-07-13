@@ -34,13 +34,15 @@ export const SymbolDesignerActions = () => {
 
   return (
     <>
-      <Button
-        divider
-        onClick={() => predictSymbol(draft.id)}
-        disabled={isPredicting}
-      >
-        ai
-      </Button>
+      {import.meta.env.VITE_OPENAI_API_KEY && (
+        <Button
+          divider
+          onClick={() => predictSymbol(draft.id)}
+          disabled={isPredicting}
+        >
+          ai
+        </Button>
+      )}
       <Button divider onClick={() => copySymbol()}>
         c
       </Button>
