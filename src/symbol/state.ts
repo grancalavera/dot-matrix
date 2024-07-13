@@ -1,11 +1,23 @@
 import { bind, state } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
-import { defer, interval, map, merge, scan, startWith, switchMap } from "rxjs";
+import {
+  catchError,
+  defer,
+  from,
+  interval,
+  map,
+  merge,
+  of,
+  scan,
+  startWith,
+  switchMap,
+} from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
 import { coinFlip, randomInt } from "../lib/random";
 import * as model from "./model";
-import * as service from "./service";
+import * as symbolService from "./service";
+import * as aiService from "../ai/service";
 
 type SymbolState = {
   draft: model.SymbolDescription;
@@ -55,14 +67,10 @@ export { flipSymbolV };
 const [rotate$, rotateSymbol] = createSignal();
 export { rotateSymbol };
 
-const [isPredicting$, setIsPredicting] = createSignal<boolean>();
+const [predict$, predictSymbol] = createSignal<string>();
+export { predictSymbol };
 
-const [useIsPredicting] = bind(isPredicting$);
-export { useIsPredicting };
-
-export const predictSymbol = (id: string) => {};
-
-export const [useSymbol, symbol$] = bind(service.symbol$);
+export const [useSymbol, symbol$] = bind(symbolService.symbol$);
 
 const state$ = state(
   mergeWithKey({
@@ -73,7 +81,7 @@ const state$ = state(
     symbol$: openSymbol$.pipe(
       startWith(model.defaultSymbolId),
       switchMap((id) => {
-        const load$ = service.symbol$(id);
+        const load$ = symbolService.symbol$(id);
         const reload$ = reset$.pipe(switchMap(() => load$));
         return merge(load$, reload$);
       })
@@ -84,6 +92,18 @@ const state$ = state(
     flipH$,
     flipV$,
     rotate$,
+    beginPrediction$: predict$,
+    endPrediction$: predict$.pipe(
+      switchMap((id) => symbol$(id)),
+      switchMap((fallback) =>
+        from(aiService.predict(fallback.id)).pipe(
+          catchError((error) => {
+            console.warn("prediction failed:", { symbol: fallback, error });
+            return of(fallback);
+          })
+        )
+      )
+    ),
   }).pipe(
     scan((current, signal) => {
       const draft = current.draft;
@@ -135,6 +155,12 @@ const state$ = state(
         case "rotate$": {
           return { ...current, draft: model.rotate180Symbol(draft) };
         }
+        case "beginPrediction$": {
+          return { ...current, isPredicting: true };
+        }
+        case "endPrediction$": {
+          return { ...current, draft: signal.payload, isPredicting: false };
+        }
         default: {
           assertNever(signal);
         }
@@ -145,6 +171,10 @@ const state$ = state(
 
 export const [useSymbolDraft, symbolDraft$] = bind(
   state$.pipe(map((state) => state.draft))
+);
+
+export const [useIsPredicting, isPredicting$] = bind(
+  state$.pipe(map((state) => state.isPredicting))
 );
 
 export const [useIsSymbolSelected] = bind((id: string) =>
@@ -174,18 +204,19 @@ export const [useSymbolDraftPixelValue] = bind((index: number) =>
 );
 
 export const [useSymbolPixelValue] = bind((id: string, index: number) => {
-  return service.symbol$(id).pipe(
+  return symbolService.symbol$(id).pipe(
     map((symbol) => symbol.data.get(index) ?? false),
     startWith(false)
   );
 });
 
-export const useSaveSymbolMutation = () => useMutation(service.saveSymbol);
+export const useSaveSymbolMutation = () =>
+  useMutation(symbolService.saveSymbol);
 
 export const [useIsSymbolDraftModified] = bind(
   symbolDraft$.pipe(
     switchMap((draft) =>
-      service
+      symbolService
         .symbol$(draft.id)
         .pipe(map((original) => model.isModified(original.data, draft.data)))
     )

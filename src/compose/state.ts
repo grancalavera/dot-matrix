@@ -136,7 +136,6 @@ export const [useScreenPixelValue] = bind((index: number) =>
     ),
   ]).pipe(
     map(([buffer, playhead, invert]) => {
-      console.log({ invert });
       const value = screenPixelValue(index, buffer, playhead);
       return invert ? !value : value;
     }),
