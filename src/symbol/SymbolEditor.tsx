@@ -26,6 +26,8 @@ const SymbolEditorPixel = (props: { pixelId: number }) => {
     >
       <pre className="debug-view">
         {props.pixelId}_{symbolIndexToRowMajor(props.pixelId)}
+        <br />
+        {on ? 1 : 0}
       </pre>
     </div>
   );
