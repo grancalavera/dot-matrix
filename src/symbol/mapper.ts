@@ -1,10 +1,10 @@
-import { SymbolData, SymbolDescription } from "./model";
+import { SymbolData, SymbolDescription, symbolSize } from "./model";
 
 export const fromBinaryString = (
   id: string,
   binaryString: string
 ): SymbolDescription => {
-  if (binaryString.length !== 63) {
+  if (binaryString.length !== symbolSize) {
     throw new Error(`Invalid binary string length: ${binaryString.length}`);
   }
 

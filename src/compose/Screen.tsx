@@ -16,7 +16,7 @@ export const Screen = () => {
   return (
     <CenterLayout className="screen">
       <div>
-        <GridLayout rows={screenRows} cols={screenCols} gap={1}>
+        <GridLayout cols={screenCols} gap={1}>
           {screenVector.map((pixelId) => (
             <Pixel key={pixelId} pixelId={pixelId} />
           ))}
