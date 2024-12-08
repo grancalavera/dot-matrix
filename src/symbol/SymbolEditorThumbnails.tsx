@@ -1,16 +1,16 @@
 import clsx from "clsx";
 import { GridLayout } from "../layout/GridLayout";
 import "./SymbolEditorThumbnails.css";
-import { symbolCols, symbolRows, symbolVector, symbols } from "./model";
+import { symbolCols, symbolVector, symbols } from "./model";
 import {
   editSymbol,
-  useSymbolPixelValue,
   useIsSymbolSelected,
   useSelectedSymbolId,
+  useSymbolPixelValue,
 } from "./state";
 
 export const SymbolEditorThumbnails = () => (
-  <GridLayout rows={6} cols={6} gap={{ rowGap: 10, columnGap: 4 }}>
+  <GridLayout cols={6} gap={{ rowGap: 10, columnGap: 4 }}>
     {symbols.map((symbol) => (
       <SymbolThumbnail key={symbol} symbol={symbol} />
     ))}
@@ -37,7 +37,7 @@ const SymbolThumbnail = (props: SymbolThumbnailProps) => {
       <p className="symbol-thumbnail-label">
         {props.symbol === " " ? <>&nbsp;</> : props.symbol}
       </p>
-      <GridLayout rows={symbolRows} cols={symbolCols} gap={1}>
+      <GridLayout cols={symbolCols} gap={1}>
         {symbolVector.map((pixelId) => (
           <Pixel
             key={`${props.symbol}-${pixelId}`}

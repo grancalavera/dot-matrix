@@ -1,11 +1,13 @@
 import { PropsWithChildren } from "react";
 import "./GridLayout.css";
 
+type GridLayoutProps = PropsWithChildren<{
+  cols: number;
+  gap?: Gap;
+}>;
 type Gap = number | { rowGap?: number; columnGap?: number };
 
-export const GridLayout = (
-  props: PropsWithChildren<{ rows: number; cols: number; gap?: Gap }>
-) => {
+export const GridLayout = (props: GridLayoutProps) => {
   let gap: number | undefined = undefined;
   let rowGap: number | undefined = undefined;
   let columnGap: number | undefined = undefined;
@@ -22,7 +24,6 @@ export const GridLayout = (
       className="grid-layout"
       style={{
         gridTemplateColumns: `repeat(${props.cols}, 1fr)`,
-        gridTemplateRows: `repeat(${props.rows}, 1fr)`,
         ...{ gap, rowGap, columnGap },
       }}
     >

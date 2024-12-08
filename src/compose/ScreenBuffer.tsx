@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { CenterLayout } from "../layout/CenterLayout";
 import { GridLayout } from "../layout/GridLayout";
-import { symbolCols, symbolRows, symbolVector } from "../symbol/model";
+import { symbolCols, symbolVector } from "../symbol/model";
 import { useSymbolPixelValue } from "../symbol/state";
 import "./ScreenBuffer.css";
 import { buffer, messageMaxLength } from "./model";
@@ -16,11 +16,7 @@ const quickEdit = (symbol: string) => {
 
 export const ScreenBuffer = () => (
   <div className="screen-buffer">
-    <GridLayout
-      cols={messageMaxLength / 4}
-      rows={4}
-      gap={{ columnGap: 0, rowGap: 5 }}
-    >
+    <GridLayout cols={messageMaxLength / 4} gap={{ columnGap: 0, rowGap: 5 }}>
       {buffer.map((i) => (
         <BufferThumbnail index={i} key={i} />
       ))}
@@ -40,7 +36,7 @@ const BufferThumbnail = (props: { index: number }) => {
         active: symbol !== undefined,
       })}
     >
-      <GridLayout rows={symbolRows} cols={symbolCols} gap={1}>
+      <GridLayout cols={symbolCols} gap={1}>
         {symbolVector.map((pixelId) => (
           <Pixel key={pixelId} pixelId={pixelId} symbol={symbol ?? " "} />
         ))}

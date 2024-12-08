@@ -1,16 +1,11 @@
 import clsx from "clsx";
 import { GridLayout } from "../layout/GridLayout";
 import "./SymbolEditor.css";
-import {
-  symbolCols,
-  symbolIndexToRowMajor,
-  symbolRows,
-  symbolVector,
-} from "./model";
+import { symbolCols, symbolIndexToRowMajor, symbolVector } from "./model";
 import { toggleSymbolPixel, useSymbolDraftPixelValue } from "./state";
 
 export const SymbolEditor = () => (
-  <GridLayout rows={symbolRows} cols={symbolCols}>
+  <GridLayout cols={symbolCols}>
     {symbolVector.map((pixelId) => (
       <SymbolEditorPixel key={pixelId} pixelId={pixelId} />
     ))}

@@ -53,7 +53,7 @@ export const predict = async (char: string) => {
   return fromBinaryString(char, transposed);
 };
 
-const sanitize = (s: string) => s.trim().replace(/\n/g, "");
+const sanitize = (s: string) => s.trim().replace(/[^01]/g, "");
 
 const transpose = (s: string) => {
   const transposed: string[] = [];
