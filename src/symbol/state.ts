@@ -32,50 +32,41 @@ const defaultState: SymbolState = {
 };
 
 const [openSymbol$, editSymbol] = createSignal<string>();
-export { editSymbol };
-
 const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
-export { toggleSymbolPixel };
-
 const [clear$, clearSymbolDraft] = createSignal();
-export { clearSymbolDraft };
-
 const [reset$, resetSymbolEdits] = createSignal();
-export { resetSymbolEdits };
-
 const [invert$, invertSymbol] = createSignal();
-export { invertSymbol };
-
 const [fill$, fillSymbol] = createSignal();
-export { fillSymbol };
-
 const [copy$, copySymbol] = createSignal();
-export { copySymbol };
-
 const [replace$, replaceSymbol] = createSignal();
-export { replaceSymbol };
-
 const [paste$, pasteSymbol] = createSignal();
-export { pasteSymbol };
-
 const [flipH$, flipSymbolH] = createSignal();
-export { flipSymbolH };
-
 const [flipV$, flipSymbolV] = createSignal();
-export { flipSymbolV };
-
 const [rotate$, rotateSymbol] = createSignal();
-export { rotateSymbol };
-
 const [predict$, predictSymbol] = createSignal<string>();
-export { predictSymbol };
+
+export {
+  editSymbol,
+  toggleSymbolPixel,
+  clearSymbolDraft,
+  resetSymbolEdits,
+  invertSymbol,
+  fillSymbol,
+  copySymbol,
+  replaceSymbol,
+  pasteSymbol,
+  flipSymbolH,
+  flipSymbolV,
+  rotateSymbol,
+  predictSymbol,
+};
 
 export const [useSymbol, symbol$] = bind(symbolService.symbol$);
 
 const loadSymbol$ = openSymbol$.pipe(
   startWith(model.defaultSymbolId),
   switchMap((id) => {
-    const load$ = symbolService.symbol$(id);
+    const load$ = symbol$(id);
     const reload$ = reset$.pipe(switchMap(() => load$));
     return merge(load$, reload$);
   })
@@ -220,7 +211,7 @@ export const [useSymbolDraftPixelValue] = bind((index: number) =>
 );
 
 export const [useSymbolPixelValue] = bind((id: string, index: number) => {
-  return symbolService.symbol$(id).pipe(
+  return symbol$(id).pipe(
     map((symbol) => symbol.data.get(index) ?? false),
     startWith(false)
   );
