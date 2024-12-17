@@ -17,9 +17,9 @@ import {
   takeUntil,
 } from "rxjs";
 import { assertNever } from "../lib/assertNever";
-import { symbol$, symbolChanged$ } from "../symbol/state";
+import { symbolChanged$ } from "../symbol/state";
 import {
-  advancePlayhead,
+  advancePlayHead,
   bufferFromSymbolDescriptions,
   bufferSymbols,
   defaultMessage,
@@ -29,24 +29,23 @@ import {
   screenFrequency,
   screenPixelValue,
 } from "./model";
+import * as symbolService from "../symbol/service";
 
 const [setMessage$, setMessage] = createSignal<string>();
-export { setMessage };
-
 const [clear$, clearMessage] = createSignal();
-export { clearMessage };
-
 const [play$, playMessage] = createSignal();
-export { playMessage };
-
 const [pause$, pauseMessage] = createSignal();
-export { pauseMessage };
-
 const [rewind$, rewindMessage] = createSignal();
-export { rewindMessage };
-
 const [invert$, invertMessage] = createSignal();
-export { invertMessage };
+
+export {
+  setMessage,
+  clearMessage,
+  playMessage,
+  pauseMessage,
+  rewindMessage,
+  invertMessage,
+};
 
 export const [useMessage, message$] = bind(
   mergeWithKey({ setMessage$, clear$ }).pipe(
@@ -94,7 +93,7 @@ export const [useIsPlayingMessage] = bind(
   )
 );
 
-export const [usePlayhead, playhead$] = bind(
+export const [usePlayHead, playHead$] = bind(
   mergeWithKey({
     advance$: play$.pipe(
       switchMap(() => interval(screenFrequency).pipe(takeUntil(stop$)))
@@ -102,15 +101,15 @@ export const [usePlayhead, playhead$] = bind(
     rewind$: merge(clear$, rewind$, messageCleared$),
   }).pipe(
     scan(
-      (playhead, signal) => (signal.type === "advance$" ? playhead + 1 : 0),
+      (playHead, signal) => (signal.type === "advance$" ? playHead + 1 : 0),
       0
     ),
     startWith(0),
-    map(advancePlayhead)
+    map(advancePlayHead)
   )
 );
 
-const buffer$ = state(
+export const buffer$ = state(
   combineLatest([message$, symbolChanged$.pipe(startWith(""))]).pipe(
     distinctUntilChanged(),
     switchMap(([message]) =>
@@ -118,7 +117,7 @@ const buffer$ = state(
         ? of([])
         : forkJoin(
             bufferSymbols(message).map((symbol) =>
-              symbol$(symbol).pipe(first())
+              symbolService.symbol$(symbol).pipe(first())
             )
           ).pipe(first())
     ),
@@ -129,14 +128,14 @@ const buffer$ = state(
 export const [useScreenPixelValue] = bind((index: number) =>
   combineLatest([
     buffer$,
-    playhead$,
+    playHead$,
     invert$.pipe(
       scan((value) => !value, false),
       startWith(false)
     ),
   ]).pipe(
-    map(([buffer, playhead, invert]) => {
-      const value = screenPixelValue(index, buffer, playhead);
+    map(([buffer, playHead, invert]) => {
+      const value = screenPixelValue(index, buffer, playHead);
       return invert ? !value : value;
     }),
     startWith(false)

@@ -10,7 +10,7 @@ import {
   screenSize,
   screenVector,
 } from "./model";
-import { usePlayhead, useScreenPixelValue } from "./state";
+import { usePlayHead, useScreenPixelValue } from "./state";
 
 export const Screen = () => {
   return (
@@ -28,11 +28,11 @@ export const Screen = () => {
 };
 
 const DebugView = () => {
-  const playhead = usePlayhead();
+  const playHead = usePlayHead();
   return (
     <p className="debug-view">
       screen size: {screenSize}, buffer size: {bufferSize / symbolSize}, screen
-      cols: {screenCols}, screen rows: {screenRows}, playhead: {playhead}
+      cols: {screenCols}, screen rows: {screenRows}, playHead: {playHead}
     </p>
   );
 };

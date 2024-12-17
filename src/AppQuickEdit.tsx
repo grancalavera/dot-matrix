@@ -1,24 +1,23 @@
 import { Subscribe } from "@react-rxjs/core";
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
+import { Fallback } from "./layout/Fallback";
 import { SectionLayout } from "./layout/SectionLayout";
 import { QuickEdit } from "./symbol/QuickEdit";
 import { QuickEditToolbar } from "./symbol/QuickEditToolbar";
 import { defaultSymbolId } from "./symbol/model";
-import { editSymbol, symbolDraft$ } from "./symbol/state";
+import { changeSymbol, symbolState$ } from "./symbol/state";
 
 function AppQuickEdit() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const symbol = params.get("s") ?? defaultSymbolId;
-    editSymbol(symbol);
+    changeSymbol(symbol);
   }, []);
 
   return (
-    <Suspense>
-      <Subscribe source$={symbolDraft$}>
-        <SectionLayout body={<QuickEdit />} footer={<QuickEditToolbar />} />
-      </Subscribe>
-    </Suspense>
+    <Subscribe source$={symbolState$} fallback={<Fallback />}>
+      <SectionLayout body={<QuickEdit />} footer={<QuickEditToolbar />} />
+    </Subscribe>
   );
 }
 
