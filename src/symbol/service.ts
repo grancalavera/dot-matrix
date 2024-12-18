@@ -1,9 +1,9 @@
 import { createSignal } from "@react-rxjs/utils";
 import memoize from "lodash/memoize";
 import { nanoid } from "nanoid";
-import { concat, defer, filter, map, of } from "rxjs";
+import { concat, defer, filter, from, Observable, switchMap } from "rxjs";
 import { fromBinaryString, toBinaryString } from "./mapper";
-import { SymbolDescription, emptySymbol } from "./model";
+import { emptySymbol, SymbolDescription } from "./model";
 
 const clientId = nanoid(4);
 
@@ -25,17 +25,21 @@ channel.onmessage = ({ data }: MessageEvent<ServiceMessage>) => {
 
 const [invalidate$, invalidate] = createSignal<string>();
 
-export const symbol$ = memoize((id: string) =>
-  defer(() => {
-    const reload$ = invalidate$.pipe(
-      filter((candidate) => candidate === id),
-      map(() => loadSymbol(id))
-    );
-    return concat(of(loadSymbol(id)), reload$);
-  })
+export const symbol$ = memoize(
+  (id: string): Observable<SymbolDescription> =>
+    defer(() => {
+      const load$ = from(loadSymbol(id));
+
+      const reload$ = invalidate$.pipe(
+        filter((candidate) => candidate === id),
+        switchMap(() => loadSymbol(id))
+      );
+
+      return concat(load$, reload$);
+    })
 );
 
-const loadSymbol = (id: string): SymbolDescription => {
+const loadSymbol = async (id: string): Promise<SymbolDescription> => {
   const binaryString = localStorage.getItem(id);
 
   if (binaryString === null) {

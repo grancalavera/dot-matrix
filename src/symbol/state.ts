@@ -12,6 +12,7 @@ import {
   scan,
   startWith,
   switchMap,
+  tap,
 } from "rxjs";
 import * as aiService from "../ai/service";
 import { assertNever } from "../lib/assertNever";
@@ -26,171 +27,160 @@ type SymbolState = {
   isPredicting: boolean;
 };
 
-const defaultState: SymbolState = {
-  draft: model.defaultSymbolDescription(),
-  isPredicting: false,
+const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
+const [clear$, clearSymbolDraft] = createSignal();
+const [reset$, resetSymbolEdits] = createSignal();
+const [invert$, invertSymbol] = createSignal();
+const [fill$, fillSymbol] = createSignal();
+const [copy$, copySymbol] = createSignal();
+const [replace$, replaceSymbol] = createSignal();
+const [paste$, pasteSymbol] = createSignal();
+const [flipH$, flipSymbolH] = createSignal();
+const [flipV$, flipSymbolV] = createSignal();
+const [rotate$, rotateSymbol] = createSignal();
+const [predict$, predictSymbol] = createSignal<string>();
+const [changeSymbol$, changeSymbol] = createSignal<string>();
+
+export {
+  clearSymbolDraft,
+  copySymbol,
+  fillSymbol,
+  flipSymbolH,
+  flipSymbolV,
+  invertSymbol,
+  pasteSymbol,
+  predictSymbol,
+  replaceSymbol,
+  resetSymbolEdits,
+  rotateSymbol,
+  toggleSymbolPixel,
+  changeSymbol,
 };
 
-const [openSymbol$, editSymbol] = createSignal<string>();
-export { editSymbol };
+export const symbolState$ = state(
+  changeSymbol$.pipe(
+    switchMap((id) => symbolService.symbol$(id)),
+    switchMap((symbol) => {
+      const initialState: SymbolState = {
+        draft: symbol,
+        isPredicting: false,
+      };
 
-const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
-export { toggleSymbolPixel };
+      const predictionResult$ = predict$.pipe(
+        switchMap(() =>
+          from(aiService.predict(symbol.id)).pipe(
+            catchError((error) => {
+              console.warn("prediction failed:", { symbol: symbol, error });
+              return of(symbol);
+            })
+          )
+        )
+      );
 
-const [clear$, clearSymbolDraft] = createSignal();
-export { clearSymbolDraft };
+      const signal$ = mergeWithKey({
+        reset$: reset$.pipe(
+          switchMap(() => symbolService.symbol$(symbol.id).pipe(first()))
+        ),
+        togglePixel$,
+        clear$,
+        invert$,
+        fill$,
+        copy$,
+        replace$,
+        paste$,
+        flipH$,
+        flipV$,
+        rotate$,
+        predict$,
+        predictionResult$,
+      });
 
-const [reset$, resetSymbolEdits] = createSignal();
-export { resetSymbolEdits };
+      return signal$.pipe(
+        scan((current, signal) => {
+          const draft = current.draft;
 
-const [invert$, invertSymbol] = createSignal();
-export { invertSymbol };
-
-const [fill$, fillSymbol] = createSignal();
-export { fillSymbol };
-
-const [copy$, copySymbol] = createSignal();
-export { copySymbol };
-
-const [replace$, replaceSymbol] = createSignal();
-export { replaceSymbol };
-
-const [paste$, pasteSymbol] = createSignal();
-export { pasteSymbol };
-
-const [flipH$, flipSymbolH] = createSignal();
-export { flipSymbolH };
-
-const [flipV$, flipSymbolV] = createSignal();
-export { flipSymbolV };
-
-const [rotate$, rotateSymbol] = createSignal();
-export { rotateSymbol };
-
-const [predict$, predictSymbol] = createSignal<string>();
-export { predictSymbol };
-
-export const [useSymbol, symbol$] = bind(symbolService.symbol$);
-
-const loadSymbol$ = openSymbol$.pipe(
-  startWith(model.defaultSymbolId),
-  switchMap((id) => {
-    const load$ = symbolService.symbol$(id);
-    const reload$ = reset$.pipe(switchMap(() => load$));
-    return merge(load$, reload$);
-  })
-);
-
-const predictionResult$ = predict$.pipe(
-  switchMap((id) => symbol$(id).pipe(first())),
-  switchMap((symbol) =>
-    from(aiService.predict(symbol.id)).pipe(
-      catchError((error) => {
-        console.warn("prediction failed:", { symbol: symbol, error });
-        return of(symbol);
-      })
-    )
-  )
-);
-
-const state$ = state(
-  mergeWithKey({
-    togglePixel$,
-    clear$,
-    invert$,
-    fill$,
-    loadSymbol$,
-    copy$,
-    replace$,
-    paste$,
-    flipH$,
-    flipV$,
-    rotate$,
-    predict$,
-    predictionResult$,
-  }).pipe(
-    scan((current, signal) => {
-      const draft = current.draft;
-
-      if (signal.type !== "predictionResult$" && current.isPredicting) {
-        return current;
-      }
-
-      switch (signal.type) {
-        case "togglePixel$": {
-          draft.data.set(signal.payload, !draft.data.get(signal.payload));
-          return { ...current, draft };
-        }
-        case "clear$": {
-          return {
-            ...current,
-            draft: model.defaultSymbolDescription(draft.id),
-          };
-        }
-        case "loadSymbol$": {
-          return { ...current, draft: signal.payload };
-        }
-        case "invert$": {
-          return { ...current, draft: model.invertSymbol(draft) };
-        }
-        case "fill$": {
-          return { ...current, draft: model.fillSymbol(draft) };
-        }
-        case "copy$": {
-          return { ...current, clipboard: model.clone(draft.data) };
-        }
-        case "replace$": {
-          if (!current.clipboard) {
+          if (signal.type !== "predictionResult$" && current.isPredicting) {
             return current;
           }
 
-          return {
-            ...current,
-            draft: { ...draft, data: model.clone(current.clipboard) },
-          };
-        }
-        case "paste$": {
-          if (!current.clipboard) {
-            return current;
-          }
+          switch (signal.type) {
+            case "togglePixel$": {
+              draft.data.set(signal.payload, !draft.data.get(signal.payload));
+              return { ...current, draft };
+            }
+            case "clear$": {
+              return {
+                ...current,
+                draft: model.defaultSymbolDescription(draft.id),
+              };
+            }
+            case "invert$": {
+              return { ...current, draft: model.invertSymbol(draft) };
+            }
+            case "fill$": {
+              return { ...current, draft: model.fillSymbol(draft) };
+            }
+            case "copy$": {
+              return { ...current, clipboard: model.clone(draft.data) };
+            }
+            case "replace$": {
+              if (!current.clipboard) {
+                return current;
+              }
 
-          return {
-            ...current,
-            draft: {
-              ...draft,
-              data: model.merge(draft.data, current.clipboard),
-            },
-          };
-        }
-        case "flipH$": {
-          return { ...current, draft: model.horizontalFlipSymbol(draft) };
-        }
-        case "flipV$": {
-          return { ...current, draft: model.verticalFlipSymbol(draft) };
-        }
-        case "rotate$": {
-          return { ...current, draft: model.rotate180Symbol(draft) };
-        }
-        case "predict$": {
-          return { ...current, isPredicting: true };
-        }
-        case "predictionResult$": {
-          return { ...current, draft: signal.payload, isPredicting: false };
-        }
-        default: {
-          assertNever(signal);
-        }
-      }
-    }, defaultState)
+              return {
+                ...current,
+                draft: { ...draft, data: model.clone(current.clipboard) },
+              };
+            }
+            case "paste$": {
+              if (!current.clipboard) {
+                return current;
+              }
+
+              return {
+                ...current,
+                draft: {
+                  ...draft,
+                  data: model.merge(draft.data, current.clipboard),
+                },
+              };
+            }
+            case "flipH$": {
+              return { ...current, draft: model.horizontalFlipSymbol(draft) };
+            }
+            case "flipV$": {
+              return { ...current, draft: model.verticalFlipSymbol(draft) };
+            }
+            case "rotate$": {
+              return { ...current, draft: model.rotate180Symbol(draft) };
+            }
+            case "predict$": {
+              return { ...current, isPredicting: true };
+            }
+            case "predictionResult$": {
+              return { ...current, draft: signal.payload, isPredicting: false };
+            }
+            case "reset$": {
+              return { ...current, draft: signal.payload };
+            }
+            default: {
+              assertNever(signal);
+            }
+          }
+        }, initialState),
+        startWith(initialState)
+      );
+    })
   )
 );
 
 export const [useSymbolDraft, symbolDraft$] = bind(
-  state$.pipe(map((state) => state.draft))
+  symbolState$.pipe(map((state) => state.draft))
 );
 
 export const [useIsPredicting, isPredicting$] = bind(
-  state$.pipe(map((state) => state.isPredicting))
+  symbolState$.pipe(map((state) => state.isPredicting))
 );
 
 export const [useIsSymbolSelected] = bind((id: string) =>
@@ -246,7 +236,7 @@ export const [useIsSymbolDraftEmpty] = bind(
 );
 
 export const symbolChanged$ = state(
-  merge(...model.symbols.map((x) => symbol$(x))).pipe(
+  merge(...model.symbols.map((x) => symbolService.symbol$(x))).pipe(
     map((symbol) => symbol.id)
   )
 );
