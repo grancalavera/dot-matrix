@@ -35,13 +35,13 @@ export const formatCharCount = (count: number) =>
 
 export const buffer = Array.from({ length: messageMaxLength }, (_, i) => i);
 
-export const advancePlayhead = (playhead: number) => playhead * stepSize;
+export const advancePlayHead = (playHead: number) => playHead * stepSize;
 
 export const screenPixelValue = (
   index: number,
   buffer: boolean[],
-  playhead: number
-) => buffer[(index + playhead) % buffer.length] ?? false;
+  playHead: number
+) => buffer[(index + playHead) % buffer.length] ?? false;
 
 export const bufferSymbols = (message: string): string[] =>
   message.padEnd(message.length + screenWidthInChars, " ").split("");

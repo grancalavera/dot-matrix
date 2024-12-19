@@ -3,7 +3,7 @@ import { GridLayout } from "../layout/GridLayout";
 import "./SymbolEditorThumbnails.css";
 import { symbolCols, symbolVector, symbols } from "./model";
 import {
-  editSymbol,
+  changeSymbol,
   useIsSymbolSelected,
   useSelectedSymbolId,
   useSymbolPixelValue,
@@ -31,7 +31,7 @@ const SymbolThumbnail = (props: SymbolThumbnailProps) => {
 
   return (
     <div
-      onClick={() => editSymbol(props.symbol)}
+      onClick={() => changeSymbol(props.symbol)}
       className={clsx("symbol-thumbnail", { selected })}
     >
       <p className="symbol-thumbnail-label">

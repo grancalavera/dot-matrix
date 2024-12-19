@@ -35,11 +35,7 @@ export const SymbolDesignerActions = () => {
   return (
     <>
       {import.meta.env.VITE_OPENAI_API_KEY && (
-        <Button
-          divider
-          onClick={() => predictSymbol(draft.id)}
-          disabled={isPredicting}
-        >
+        <Button divider onClick={() => predictSymbol()} disabled={isPredicting}>
           ai
         </Button>
       )}
@@ -68,8 +64,13 @@ export const SymbolDesignerActions = () => {
         reset
       </Button>
       <Button
-        onClick={() => save(draft)}
-        disabled={draftIsNotModified || isPredicting}
+        onClick={() => {
+          if (!draft) {
+            return;
+          }
+          save(draft);
+        }}
+        disabled={draftIsNotModified || isPredicting || !draft}
         primary
       >
         save
