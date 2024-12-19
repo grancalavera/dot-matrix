@@ -3,6 +3,7 @@ import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import {
   catchError,
   defer,
+  filter,
   first,
   from,
   interval,
@@ -12,7 +13,6 @@ import {
   scan,
   startWith,
   switchMap,
-  tap,
 } from "rxjs";
 import * as aiService from "../ai/service";
 import { assertNever } from "../lib/assertNever";
@@ -38,10 +38,11 @@ const [paste$, pasteSymbol] = createSignal();
 const [flipH$, flipSymbolH] = createSignal();
 const [flipV$, flipSymbolV] = createSignal();
 const [rotate$, rotateSymbol] = createSignal();
-const [predict$, predictSymbol] = createSignal<string>();
+const [predict$, predictSymbol] = createSignal();
 const [changeSymbol$, changeSymbol] = createSignal<string>();
 
 export {
+  changeSymbol,
   clearSymbolDraft,
   copySymbol,
   fillSymbol,
@@ -54,7 +55,6 @@ export {
   resetSymbolEdits,
   rotateSymbol,
   toggleSymbolPixel,
-  changeSymbol,
 };
 
 export const symbolState$ = state(
@@ -175,19 +175,27 @@ export const symbolState$ = state(
   )
 );
 
-export const [useSymbolDraft, symbolDraft$] = bind(
-  symbolState$.pipe(map((state) => state.draft))
+export const [useSymbolDraft] = bind(
+  symbolState$.pipe(
+    map((state) => state.draft),
+    startWith(undefined)
+  )
 );
 
 export const [useIsPredicting, isPredicting$] = bind(
-  symbolState$.pipe(map((state) => state.isPredicting))
+  symbolState$.pipe(
+    map((state) => state.isPredicting),
+    startWith(false)
+  )
 );
 
 export const [useIsSymbolSelected] = bind((id: string) =>
-  symbolDraft$.pipe(map((draft) => draft.id === id))
+  symbolState$.pipe(map((state) => state.draft.id === id))
 );
 
-export const [useSelectedSymbolId] = bind(symbolDraft$.pipe(map((x) => x.id)));
+export const [useSelectedSymbolId] = bind(
+  symbolState$.pipe(map((state) => state.draft.id))
+);
 
 export const [useSymbolDraftPixelValue] = bind((index: number) =>
   defer(() => {
@@ -198,8 +206,8 @@ export const [useSymbolDraftPixelValue] = bind((index: number) =>
       startWith(random())
     );
 
-    const actualValue$ = symbolDraft$.pipe(
-      map((draft) => draft.data.get(index) ?? false)
+    const actualValue$ = symbolState$.pipe(
+      map((state) => state.draft.data.get(index) ?? false)
     );
 
     return isPredicting$.pipe(
@@ -220,18 +228,22 @@ export const useSaveSymbolMutation = () =>
   useMutation(symbolService.saveSymbol);
 
 export const [useIsSymbolDraftModified] = bind(
-  symbolDraft$.pipe(
-    switchMap((draft) =>
+  symbolState$.pipe(
+    switchMap((state) =>
       symbolService
-        .symbol$(draft.id)
-        .pipe(map((original) => model.isModified(original.data, draft.data)))
-    )
+        .symbol$(state.draft.id)
+        .pipe(
+          map((original) => model.isModified(original.data, state.draft.data))
+        )
+    ),
+    startWith(false)
   )
 );
 
 export const [useIsSymbolDraftEmpty] = bind(
-  symbolDraft$.pipe(
-    map((draft) => [...draft.data.values()].every((pixel) => !pixel))
+  symbolState$.pipe(
+    map((state) => [...state.draft.data.values()].every((pixel) => !pixel)),
+    startWith(true)
   )
 );
 

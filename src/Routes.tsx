@@ -1,11 +1,10 @@
 import { Subscribe } from "@react-rxjs/core";
+import { useEffect } from "react";
 import { Compose } from "./Compose";
 import { Design } from "./Design";
-import { Fallback } from "./layout/Fallback";
 import { useSelectedSection } from "./navigation/state";
-import { useEffect } from "react";
-import { changeSymbol, symbolState$ } from "./symbol/state";
 import { defaultSymbolId } from "./symbol/model";
+import { changeSymbol, symbolState$ } from "./symbol/state";
 
 export const Routes = () => {
   const section = useSelectedSection();
@@ -15,7 +14,7 @@ export const Routes = () => {
   }, []);
 
   return (
-    <Subscribe source$={symbolState$} fallback={<Fallback />}>
+    <Subscribe source$={symbolState$}>
       {section === "design" && <Design />}
       {section === "compose" && <Compose />}
     </Subscribe>

@@ -15,8 +15,15 @@ function AppQuickEdit() {
   }, []);
 
   return (
-    <Subscribe source$={symbolState$} fallback={<Fallback />}>
-      <SectionLayout body={<QuickEdit />} footer={<QuickEditToolbar />} />
+    <Subscribe source$={symbolState$}>
+      <SectionLayout
+        body={
+          <Subscribe fallback={<Fallback />}>
+            <QuickEdit />
+          </Subscribe>
+        }
+        footer={<QuickEditToolbar />}
+      />
     </Subscribe>
   );
 }
