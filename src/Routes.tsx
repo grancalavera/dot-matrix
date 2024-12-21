@@ -4,7 +4,10 @@ import { Compose } from "./Compose";
 import { Design } from "./Design";
 import { useSelectedSection } from "./navigation/state";
 import { defaultSymbolId } from "./symbol/model";
-import { changeSymbol, symbolState$ } from "./symbol/state";
+import { changeSymbol, clipboard$, symbolState$ } from "./symbol/state";
+import { merge } from "rxjs";
+
+const source$ = merge(symbolState$, clipboard$);
 
 export const Routes = () => {
   const section = useSelectedSection();
@@ -14,7 +17,7 @@ export const Routes = () => {
   }, []);
 
   return (
-    <Subscribe source$={symbolState$}>
+    <Subscribe source$={source$}>
       {section === "design" && <Design />}
       {section === "compose" && <Compose />}
     </Subscribe>

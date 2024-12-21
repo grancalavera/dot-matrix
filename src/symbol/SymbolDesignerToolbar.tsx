@@ -42,7 +42,6 @@ export const SymbolDesignerActions = () => {
   const handleExport = () => {
     startExportTransition(async () => {
       const data = await symbolService.exportSymbols();
-
       const element = document.createElement("a");
       const file = new Blob([data], {
         type: "application/json",
