@@ -1,4 +1,4 @@
-import { bind, state } from "@react-rxjs/core";
+import { bind, state, StateObservable } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import {
   catchError,
@@ -22,9 +22,10 @@ import * as symbolService from "./service";
 
 type SymbolState = {
   draft: model.SymbolDescription;
-  clipboard?: model.SymbolData;
   isPredicting: boolean;
 };
+
+type ClipboardState = model.SymbolData | undefined;
 
 const [togglePixel$, toggleSymbolPixel] = createSignal<number>();
 const [clear$, clearSymbolDraft] = createSignal();
@@ -56,7 +57,15 @@ export {
   toggleSymbolPixel,
 };
 
-export const symbolState$ = state(
+export const clipboard$: StateObservable<ClipboardState> = state(
+  copy$.pipe(
+    switchMap(() => symbolState$.pipe(first())),
+    map((state) => model.clone(state.draft.data)),
+    startWith(undefined)
+  )
+);
+
+export const symbolState$: StateObservable<SymbolState> = state(
   changeSymbol$.pipe(
     switchMap((id) => symbolService.symbol$(id)),
     switchMap((symbol) => {
@@ -80,13 +89,12 @@ export const symbolState$ = state(
         reset$: reset$.pipe(
           switchMap(() => symbolService.symbol$(symbol.id).pipe(first()))
         ),
+        replace$: replace$.pipe(switchMap(() => clipboard$)),
+        paste$: paste$.pipe(switchMap(() => clipboard$)),
         togglePixel$,
         clear$,
         invert$,
         fill$,
-        copy$,
-        replace$,
-        paste$,
         flipH$,
         flipV$,
         rotate$,
@@ -104,8 +112,10 @@ export const symbolState$ = state(
 
           switch (signal.type) {
             case "togglePixel$": {
-              draft.data[signal.payload] = !draft.data[signal.payload];
-              return { ...current, draft };
+              return {
+                ...current,
+                draft: model.togglePixel(draft, signal.payload),
+              };
             }
             case "clear$": {
               return {
@@ -119,21 +129,23 @@ export const symbolState$ = state(
             case "fill$": {
               return { ...current, draft: model.fillSymbol(draft) };
             }
-            case "copy$": {
-              return { ...current, clipboard: model.clone(draft.data) };
-            }
             case "replace$": {
-              if (!current.clipboard) {
+              const clipboard = signal.payload;
+              console.log("replace", clipboard);
+
+              if (!clipboard) {
                 return current;
               }
 
               return {
                 ...current,
-                draft: { ...draft, data: model.clone(current.clipboard) },
+                draft: { ...draft, data: model.clone(clipboard) },
               };
             }
             case "paste$": {
-              if (!current.clipboard) {
+              const clipboard = signal.payload;
+
+              if (!clipboard) {
                 return current;
               }
 
@@ -141,7 +153,7 @@ export const symbolState$ = state(
                 ...current,
                 draft: {
                   ...draft,
-                  data: model.merge(draft.data, current.clipboard),
+                  data: model.merge(draft.data, clipboard),
                 },
               };
             }

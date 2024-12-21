@@ -124,3 +124,12 @@ export const horizontalFlipSymbol = (
 
 export const rotate180Symbol = (symbol: SymbolDescription): SymbolDescription =>
   verticalFlipSymbol(horizontalFlipSymbol(symbol));
+
+export const togglePixel = (
+  symbol: SymbolDescription,
+  id: number
+): SymbolDescription => {
+  const data: SymbolData = [...symbol.data];
+  data[id] = !data[id];
+  return { ...symbol, data };
+};
