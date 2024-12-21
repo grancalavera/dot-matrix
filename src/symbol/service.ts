@@ -2,9 +2,10 @@ import { createSignal } from "@react-rxjs/utils";
 import memoize from "lodash/memoize";
 import { nanoid } from "nanoid";
 import { concat, defer, filter, from, Observable, switchMap } from "rxjs";
+import { defaultSymbols } from "./default-symbols";
 import { fromBinaryString, toBinaryString } from "./mapper";
 import { emptySymbol, SymbolDescription, symbols } from "./model";
-import { defaultSymbols } from "./default-symbols";
+import * as symbolWorkerClient from "./symbol-worker-client";
 
 const clientId = nanoid(4);
 
@@ -21,7 +22,7 @@ const broadcastSymbolChange = (symbolId: string) => {
 };
 
 channel.onmessage = ({ data }: MessageEvent<ServiceMessage>) => {
-  if (data.clientId !== clientId) invalidate(data.symbolId);
+  invalidate(data.symbolId);
 };
 
 const [invalidate$, invalidate] = createSignal<string>();
@@ -60,6 +61,7 @@ export const saveSymbol = async ({
   id,
   data,
 }: SymbolDescription): Promise<void> => {
+  await symbolWorkerClient.saveSymbol({ id, data });
   localStorage.setItem(id, toBinaryString(data));
   invalidate(id);
   broadcastSymbolChange(id);

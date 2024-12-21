@@ -1,6 +1,12 @@
+import { get, set } from "idb-keyval";
 import { assertNever } from "../lib/assertNever";
-import { SymbolDescription } from "./model";
-import { createSaveSymbolResponse, SymbolRequest } from "./symbol-protocol";
+import {
+  createLoadSymbolResponseFailure,
+  createLoadSymbolResponseSuccess,
+  createSaveSymbolResponse,
+  SymbolRequest,
+  SymbolResponse,
+} from "./symbol-protocol";
 
 const $ = self as unknown as SharedWorkerGlobalScope;
 
@@ -18,20 +24,42 @@ $.onconnect = (e) => {
 
     switch (message.type) {
       case "saveSymbol": {
+        let response: SymbolResponse;
+
         try {
-          await saveSymbol(message.symbol);
+          await set(message.symbol.id, message.symbol.data);
+          response = createSaveSymbolResponse(message.correlationId);
         } catch (error) {
-          port.postMessage(
-            createSaveSymbolResponse(message.correlationId, error)
-          );
+          response = createSaveSymbolResponse(message.correlationId, error);
         }
+
+        port.postMessage(response);
         break;
       }
+
+      case "loadSymbol": {
+        let response: SymbolResponse;
+
+        try {
+          const data = await get(message.id);
+          response = createLoadSymbolResponseSuccess(
+            message.correlationId,
+            data
+          );
+        } catch (error) {
+          response = createLoadSymbolResponseFailure(
+            message.correlationId,
+            error
+          );
+        }
+
+        port.postMessage(response);
+        break;
+      }
+
       default: {
-        assertNever(message.type);
+        assertNever(message);
       }
     }
   };
 };
-
-async function saveSymbol({ id, data }: SymbolDescription): Promise<void> {}

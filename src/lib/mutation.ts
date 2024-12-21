@@ -4,8 +4,8 @@ import { useRef } from "react";
 import { catchError, from, map, of, startWith, switchMap } from "rxjs";
 import { assertNever } from "./assertNever";
 import { errorFromUnknown } from "./errors";
-import * as result from "./result";
-import { AsyncResult } from "./result";
+import * as result from "./async-result";
+import { AsyncResult, failure } from "./async-result";
 
 export type Mutation<TParams = void, TResponse = void> = {
   mutate: (params: TParams) => void;
@@ -28,7 +28,9 @@ const createMutation = <TParams, TResponse>(
         case "mutate$": {
           return from(mutationFn(signal.payload)).pipe(
             map((response) => result.success(response)),
-            catchError((error) => of(errorFromUnknown(error))),
+            catchError((error) =>
+              of(failure<TResponse>(errorFromUnknown(error)))
+            ),
             startWith(result.loading)
           );
         }
@@ -45,14 +47,21 @@ const createMutation = <TParams, TResponse>(
   return { mutate, reset, useResult };
 };
 
-// prettier-ignore
-export function useMutation(mutationFunction: () => Promise<void>): Mutation<void, void>;
-// prettier-ignore
-export function useMutation<TParams>(mutationFunction: (params: TParams) => Promise<void>): Mutation<TParams, void>;
-// prettier-ignore
-export function useMutation<TParams, TResponse>(mutationFunction: (params: TParams) => Promise<TResponse>): Mutation<TParams, TResponse>;
-// prettier-ignore
-export function useMutation<TParams = void, TResult = void>(mutationFunction: (params: TParams) => Promise<TResult>): Mutation<TParams, TResult> {
+export function useMutation(
+  mutationFunction: () => Promise<void>
+): Mutation<void, void>;
+
+export function useMutation<TParams>(
+  mutationFunction: (params: TParams) => Promise<void>
+): Mutation<TParams, void>;
+
+export function useMutation<TParams, TResponse>(
+  mutationFunction: (params: TParams) => Promise<TResponse>
+): Mutation<TParams, TResponse>;
+
+export function useMutation<TParams = void, TResult = void>(
+  mutationFunction: (params: TParams) => Promise<TResult>
+): Mutation<TParams, TResult> {
   const { mutate, reset, useResult } = useRef(
     createMutation(mutationFunction)
   ).current;

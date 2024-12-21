@@ -1,8 +1,10 @@
 import { nanoid } from "nanoid";
 import { SymbolDescription } from "./model";
+import { Result, success, failure } from "../lib/result";
+import { errorFromUnknown } from "../lib/errors";
 
-export type SymbolRequest = SaveSymbolRequest;
-export type SymbolResponse = SaveSymbolResponse;
+export type SymbolRequest = SaveSymbolRequest | LoadSymbolRequest;
+export type SymbolResponse = SaveSymbolResponse | LoadSymbolResponse;
 
 export type SaveSymbolRequest = {
   type: "saveSymbol";
@@ -13,7 +15,19 @@ export type SaveSymbolRequest = {
 export type SaveSymbolResponse = {
   type: "saveSymbol";
   correlationId: string;
-  error?: unknown;
+  response: Result<void>;
+};
+
+export type LoadSymbolRequest = {
+  type: "loadSymbol";
+  correlationId: string;
+  id: string;
+};
+
+export type LoadSymbolResponse = {
+  type: "loadSymbol";
+  correlationId: string;
+  response: Result<SymbolDescription>;
 };
 
 export function createSaveSymbolRequest(
@@ -33,6 +47,36 @@ export function createSaveSymbolResponse(
   return {
     correlationId,
     type: "saveSymbol",
-    error,
+    response: error ? failure(errorFromUnknown(error)) : success(),
+  };
+}
+
+export function createLoadSymbolRequest(id: string): LoadSymbolRequest {
+  return {
+    correlationId: nanoid(),
+    type: "loadSymbol",
+    id,
+  };
+}
+
+export function createLoadSymbolResponseSuccess(
+  correlationId: string,
+  symbol: SymbolDescription
+): LoadSymbolResponse {
+  return {
+    correlationId,
+    type: "loadSymbol",
+    response: success(symbol),
+  };
+}
+
+export function createLoadSymbolResponseFailure(
+  correlationId: string,
+  error: unknown
+): LoadSymbolResponse {
+  return {
+    correlationId,
+    type: "loadSymbol",
+    response: failure(errorFromUnknown(error)),
   };
 }
