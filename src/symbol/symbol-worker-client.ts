@@ -14,33 +14,41 @@ const worker = new SharedWorker(
 worker.port.start();
 
 export async function saveSymbol(symbol: SymbolDescription): Promise<void> {
-  let resolve: () => void;
-  let reject: (error: unknown) => void;
-
-  const result = new Promise<void>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
+  const { promise, reject, resolve } = Promise.withResolvers<void>();
 
   const message = createSaveSymbolRequest(symbol);
 
   function handler(e: MessageEvent<SymbolResponse>) {
+    let response: void;
+
     const { data } = e;
 
-    if (data.correlationId !== message.correlationId) {
+    if (
+      data.correlationId !== message.correlationId ||
+      data.kind !== "saveSymbol"
+    ) {
       return;
     }
 
     worker.port.removeEventListener("message", handler);
 
-    if (data.error) {
-      reject(data.error);
-    } else {
-      resolve();
+    if (data.body.kind === "E") {
+      reject(data.body.error);
+    }
+
+    if (data.body.kind === "N") {
+      response = data.body.value;
+    }
+
+    if (data.body.kind === "C") {
+      // here, in the case where the response is not void, we would have to
+      // check we do actually have a value, if not we reject the promise
+      resolve(response);
     }
   }
 
   worker.port.addEventListener("message", handler);
   worker.port.postMessage(message);
-  return result;
+
+  return promise;
 }

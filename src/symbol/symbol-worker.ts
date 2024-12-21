@@ -1,9 +1,8 @@
-import { get, set } from "idb-keyval";
+import { set } from "idb-keyval";
 import { assertNever } from "../lib/assertNever";
 import {
-  createLoadSymbolResponseFailure,
-  createLoadSymbolResponseSuccess,
-  createSaveSymbolResponse,
+  createSaveSymbolCompleteResponse,
+  createSaveSymbolErrorResponse,
   SymbolRequest,
   SymbolResponse,
 } from "./symbol-protocol";
@@ -19,18 +18,21 @@ $.onconnect = (e) => {
 
   port.start();
 
-  port.onmessage = async (e) => {
-    const message: SymbolRequest = e.data;
+  port.onmessage = async (e: MessageEvent<SymbolRequest>) => {
+    const message = e.data;
 
-    switch (message.type) {
+    switch (message.kind) {
       case "saveSymbol": {
         let response: SymbolResponse;
 
         try {
-          await set(message.symbol.id, message.symbol.data);
-          response = createSaveSymbolResponse(message.correlationId);
+          await set(message.body.id, message.body.data);
+          response = createSaveSymbolCompleteResponse(message.correlationId);
         } catch (error) {
-          response = createSaveSymbolResponse(message.correlationId, error);
+          response = createSaveSymbolErrorResponse(
+            message.correlationId,
+            error
+          );
         }
 
         port.postMessage(response);
@@ -38,22 +40,22 @@ $.onconnect = (e) => {
       }
 
       case "loadSymbol": {
-        let response: SymbolResponse;
+        // let response: SymbolResponse;
 
-        try {
-          const data = await get(message.id);
-          response = createLoadSymbolResponseSuccess(
-            message.correlationId,
-            data
-          );
-        } catch (error) {
-          response = createLoadSymbolResponseFailure(
-            message.correlationId,
-            error
-          );
-        }
+        // try {
+        //   const data = await get(message.id);
+        //   response = createLoadSymbolResponseSuccess(
+        //     message.correlationId,
+        //     data
+        //   );
+        // } catch (error) {
+        //   response = createLoadSymbolResponseFailure(
+        //     message.correlationId,
+        //     error
+        //   );
+        // }
 
-        port.postMessage(response);
+        // port.postMessage(response);
         break;
       }
 
