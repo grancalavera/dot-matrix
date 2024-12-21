@@ -3,7 +3,8 @@ import memoize from "lodash/memoize";
 import { nanoid } from "nanoid";
 import { concat, defer, filter, from, Observable, switchMap } from "rxjs";
 import { fromBinaryString, toBinaryString } from "./mapper";
-import { emptySymbol, SymbolDescription } from "./model";
+import { emptySymbol, SymbolDescription, symbols } from "./model";
+import { defaultSymbols } from "./default-symbols";
 
 const clientId = nanoid(4);
 
@@ -42,11 +43,17 @@ export const symbol$ = memoize(
 const loadSymbol = async (id: string): Promise<SymbolDescription> => {
   const binaryString = localStorage.getItem(id);
 
-  if (binaryString === null) {
-    return { id, data: emptySymbol() };
+  if (typeof binaryString === "string") {
+    return fromBinaryString(id, binaryString);
   }
 
-  return fromBinaryString(id, binaryString);
+  const defaultSymbolData = defaultSymbols[id];
+
+  if (defaultSymbolData !== undefined) {
+    return { id, data: defaultSymbolData };
+  }
+
+  return { id, data: emptySymbol() };
 };
 
 export const saveSymbol = async ({
@@ -56,4 +63,16 @@ export const saveSymbol = async ({
   localStorage.setItem(id, toBinaryString(data));
   invalidate(id);
   broadcastSymbolChange(id);
+};
+
+export const exportSymbols = async (): Promise<string> => {
+  const serialized = Object.fromEntries(
+    await Promise.all(
+      symbols.map(async (id) => {
+        const symbol = await loadSymbol(id);
+        return [symbol.id, symbol.data] as const;
+      })
+    )
+  );
+  return JSON.stringify(serialized, null, 2);
 };

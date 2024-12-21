@@ -1,4 +1,6 @@
+import { useTransition } from "react";
 import { Button, Toolbar } from "../components";
+import * as symbolService from "./service";
 import {
   clearSymbolDraft,
   copySymbol,
@@ -14,7 +16,6 @@ import {
   useIsPredicting,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
-  useSaveSymbolMutation,
   useSymbolDraft,
 } from "./state";
 
@@ -25,15 +26,44 @@ export const SymbolDesignerToolbar = () => (
 );
 
 export const SymbolDesignerActions = () => {
-  const { mutate: save } = useSaveSymbolMutation();
-
   const draft = useSymbolDraft();
   const draftIsEmpty = useIsSymbolDraftEmpty();
-  const draftIsNotModified = !useIsSymbolDraftModified();
+  const draftIsModified = useIsSymbolDraftModified();
   const isPredicting = useIsPredicting();
+
+  const [, startSaveTransition] = useTransition();
+  const [, startExportTransition] = useTransition();
+
+  const handleSave = () => {
+    if (!draft) return;
+    startSaveTransition(() => symbolService.saveSymbol(draft));
+  };
+
+  const handleExport = () => {
+    startExportTransition(async () => {
+      const data = await symbolService.exportSymbols();
+
+      const element = document.createElement("a");
+      const file = new Blob([data], {
+        type: "application/json",
+      });
+      element.href = URL.createObjectURL(file);
+      element.download = "symbols.json";
+      document.body.appendChild(element);
+      element.click();
+      element.remove();
+    });
+  };
 
   return (
     <>
+      <Button
+        divider
+        onClick={() => handleExport()}
+        disabled={isPredicting || draftIsModified}
+      >
+        e
+      </Button>
       {import.meta.env.VITE_OPENAI_API_KEY && (
         <Button divider onClick={() => predictSymbol()} disabled={isPredicting}>
           ai
@@ -59,18 +89,13 @@ export const SymbolDesignerActions = () => {
       <Button
         divider
         onClick={() => resetSymbolEdits()}
-        disabled={draftIsNotModified || isPredicting}
+        disabled={!draftIsModified || isPredicting}
       >
         reset
       </Button>
       <Button
-        onClick={() => {
-          if (!draft) {
-            return;
-          }
-          save(draft);
-        }}
-        disabled={draftIsNotModified || isPredicting || !draft}
+        onClick={() => handleSave()}
+        disabled={!draftIsModified || isPredicting || !draft}
         primary
       >
         save

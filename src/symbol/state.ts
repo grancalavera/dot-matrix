@@ -3,7 +3,6 @@ import { createSignal, mergeWithKey } from "@react-rxjs/utils";
 import {
   catchError,
   defer,
-  filter,
   first,
   from,
   interval,
@@ -105,7 +104,7 @@ export const symbolState$ = state(
 
           switch (signal.type) {
             case "togglePixel$": {
-              draft.data.set(signal.payload, !draft.data.get(signal.payload));
+              draft.data[signal.payload] = !draft.data[signal.payload];
               return { ...current, draft };
             }
             case "clear$": {
@@ -175,7 +174,7 @@ export const symbolState$ = state(
   )
 );
 
-export const [useSymbolDraft] = bind(
+export const [useSymbolDraft, symbolDraft$] = bind(
   symbolState$.pipe(
     map((state) => state.draft),
     startWith(undefined)
@@ -207,7 +206,7 @@ export const [useSymbolDraftPixelValue] = bind((index: number) =>
     );
 
     const actualValue$ = symbolState$.pipe(
-      map((state) => state.draft.data.get(index) ?? false)
+      map((state) => state.draft.data[index] ?? false)
     );
 
     return isPredicting$.pipe(
@@ -219,7 +218,7 @@ export const [useSymbolDraftPixelValue] = bind((index: number) =>
 
 export const [useSymbolPixelValue] = bind((id: string, index: number) => {
   return symbolService.symbol$(id).pipe(
-    map((symbol) => symbol.data.get(index) ?? false),
+    map((symbol) => symbol.data[index] ?? false),
     startWith(false)
   );
 });
