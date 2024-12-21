@@ -53,6 +53,13 @@ export function createLoadSymbolUpdateResponse(
   return createUpdateResponse("loadSymbol", correlationId, symbol);
 }
 
+export function createLoadSymbolErrorResponse(
+  correlationId: string,
+  error: unknown
+): LoadSymbolResponse {
+  return createErrorResponse("loadSymbol", correlationId, error);
+}
+
 // -----------------------------------------------------------------------------
 //
 // Protocol
@@ -87,18 +94,18 @@ function createUpdateResponse<TKind extends string, TBody>(
   return createResponse(kind, correlationId, { kind: "N", value: body });
 }
 
-function createCompleteResponse<TKind extends string>(
+function createCompleteResponse<TKind extends string, TBody = void>(
   kind: TKind,
   correlationId: string
-): ResponseEvent<TKind> {
+): ResponseEvent<TKind, TBody> {
   return createResponse(kind, correlationId, { kind: "C" });
 }
 
-function createErrorResponse<TKind extends string>(
+function createErrorResponse<TKind extends string, TBody = void>(
   kind: TKind,
   correlationId: string,
   error: unknown
-): ResponseEvent<TKind> {
+): ResponseEvent<TKind, TBody> {
   return createResponse(kind, correlationId, { kind: "E", error });
 }
 

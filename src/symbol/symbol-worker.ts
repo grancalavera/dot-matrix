@@ -1,11 +1,15 @@
-import { set } from "idb-keyval";
+import { get, set } from "idb-keyval";
 import { assertNever } from "../lib/assertNever";
 import {
+  createLoadSymbolErrorResponse,
+  createLoadSymbolUpdateResponse,
   createSaveSymbolCompleteResponse,
   createSaveSymbolErrorResponse,
   SymbolRequest,
   SymbolResponse,
 } from "./symbol-protocol";
+import { emptySymbol, SymbolData, SymbolDescription } from "./model";
+import { defaultSymbols } from "./default-symbols";
 
 const $ = self as unknown as SharedWorkerGlobalScope;
 
@@ -40,22 +44,22 @@ $.onconnect = (e) => {
       }
 
       case "loadSymbol": {
-        // let response: SymbolResponse;
+        let response: SymbolResponse;
 
-        // try {
-        //   const data = await get(message.id);
-        //   response = createLoadSymbolResponseSuccess(
-        //     message.correlationId,
-        //     data
-        //   );
-        // } catch (error) {
-        //   response = createLoadSymbolResponseFailure(
-        //     message.correlationId,
-        //     error
-        //   );
-        // }
+        try {
+          const data = await loadSymbol(message.body);
+          response = createLoadSymbolUpdateResponse(
+            message.correlationId,
+            data
+          );
+        } catch (error) {
+          response = createLoadSymbolErrorResponse(
+            message.correlationId,
+            error
+          );
+        }
 
-        // port.postMessage(response);
+        port.postMessage(response);
         break;
       }
 
@@ -64,4 +68,9 @@ $.onconnect = (e) => {
       }
     }
   };
+};
+
+const loadSymbol = async (id: string): Promise<SymbolDescription> => {
+  const data = await get<SymbolData | undefined>(id);
+  return { id, data: data ?? defaultSymbols[id] ?? emptySymbol() };
 };
