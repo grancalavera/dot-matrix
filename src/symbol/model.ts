@@ -14,7 +14,7 @@ export const defaultSymbolId = symbols[0] ?? "Z";
 export const isKnownSymbol = (symbol: string) => symbols.includes(symbol);
 
 export type SymbolDescription = { id: string; data: SymbolData };
-export type SymbolData = Map<number, boolean>;
+export type SymbolData = boolean[];
 
 export const symbolRows = 9;
 export const symbolCols = 7;
@@ -52,9 +52,9 @@ export const symbolVector = Array.from({ length: symbolSize }, (_, i) =>
 );
 
 export const emptySymbol = (): SymbolData => {
-  const symbol = new Map<number, boolean>();
+  const symbol: SymbolData = [];
   for (let i = 0; i < symbolSize; i++) {
-    symbol.set(i, false);
+    symbol.push(false);
   }
   return symbol;
 };
@@ -71,7 +71,7 @@ export const isModified = (
   draft: SymbolData
 ): boolean => {
   for (let i = 0; i < symbolSize; i++) {
-    if (original.get(i) !== draft.get(i)) {
+    if (original[i] !== draft[i]) {
       return true;
     }
   }
@@ -79,38 +79,32 @@ export const isModified = (
 };
 
 export const invertSymbol = (symbol: SymbolDescription): SymbolDescription => {
-  symbol.data.forEach((value, key) => symbol.data.set(key, !value));
+  symbol.data = symbol.data.map((value) => !value);
   return symbol;
 };
 
 export const fillSymbol = (symbol: SymbolDescription): SymbolDescription => {
-  symbol.data.forEach((_, key) => symbol.data.set(key, true));
+  symbol.data = symbol.data.map(() => true);
   return symbol;
 };
 
-export const clone = (data: SymbolData) => {
-  const symbol = new Map<number, boolean>();
-  data.forEach((value, key) => symbol.set(key, value));
-  return symbol;
+export const clone = (data: SymbolData): SymbolData => {
+  return [...data];
 };
 
 export const merge = (base: SymbolData, merged: SymbolData): SymbolData => {
-  const symbol = new Map<number, boolean>();
-  base.forEach((orinalValue, key) =>
-    symbol.set(key, merged.get(key) || orinalValue)
-  );
-  return symbol;
+  return base.map((value, index) => merged[index] || value);
 };
 
 export const verticalFlipSymbol = (
   symbol: SymbolDescription
 ): SymbolDescription => {
-  const data = new Map<number, boolean>();
+  const data: SymbolData = [];
   symbol.data.forEach((value, key) => {
     const coords = colMajorIndexCoordinates(key);
     const flippedRow = symbolRows - 1 - coords.row;
     const index = coords.col * symbolRows + flippedRow;
-    data.set(index, value);
+    data[index] = value;
   });
   return { ...symbol, data };
 };
@@ -118,12 +112,12 @@ export const verticalFlipSymbol = (
 export const horizontalFlipSymbol = (
   symbol: SymbolDescription
 ): SymbolDescription => {
-  const data = new Map<number, boolean>();
+  const data: SymbolData = [];
   symbol.data.forEach((value, key) => {
     const coords = colMajorIndexCoordinates(key);
     const flippedCol = symbolCols - 1 - coords.col;
     const index = flippedCol * symbolRows + coords.row;
-    data.set(index, value);
+    data[index] = value;
   });
   return { ...symbol, data };
 };

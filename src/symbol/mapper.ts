@@ -12,9 +12,9 @@ export const fromBinaryString = (
     throw new Error(`Invalid binary string characters: ${binaryString}`);
   }
 
-  const data = new Map<number, boolean>();
+  const data: boolean[] = [];
   for (let i = 0; i < binaryString.length; i++) {
-    data.set(i, binaryString[i] === "1");
+    data[i] = binaryString[i] === "1";
   }
 
   return { id, data };
@@ -22,8 +22,8 @@ export const fromBinaryString = (
 
 export const toBinaryString = (data: SymbolData): string => {
   let binaryString = "";
-  for (let i = 0; i < data.size; i++) {
-    binaryString += data.get(i) ? "1" : "0";
+  for (let i = 0; i < data.length; i++) {
+    binaryString += data[i] ? "1" : "0";
   }
   return binaryString;
 };
