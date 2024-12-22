@@ -1,6 +1,7 @@
 import { get, set } from "idb-keyval";
 import { assertNever } from "../lib/assertNever";
 import {
+  createLoadSymbolCompleteResponse,
   createLoadSymbolErrorResponse,
   createLoadSymbolUpdateResponse,
   createSaveSymbolCompleteResponse,
@@ -44,22 +45,22 @@ $.onconnect = (e) => {
       }
 
       case "loadSymbol": {
-        let response: SymbolResponse;
-
         try {
           const data = await loadSymbol(message.body);
-          response = createLoadSymbolUpdateResponse(
+          const update = createLoadSymbolUpdateResponse(
             message.correlationId,
             data
           );
+          const complete = createLoadSymbolCompleteResponse(
+            message.correlationId
+          );
+          port.postMessage(update);
+          port.postMessage(complete);
         } catch (error) {
-          response = createLoadSymbolErrorResponse(
-            message.correlationId,
-            error
+          port.postMessage(
+            createLoadSymbolErrorResponse(message.correlationId, error)
           );
         }
-
-        port.postMessage(response);
         break;
       }
 

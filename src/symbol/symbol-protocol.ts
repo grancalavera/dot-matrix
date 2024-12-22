@@ -2,6 +2,12 @@ import { ObservableNotification } from "rxjs";
 import { SymbolDescription } from "./model";
 import { nanoid } from "nanoid";
 
+// -----------------------------------------------------------------------------
+//
+// Protocol
+//
+// -----------------------------------------------------------------------------
+
 export type SymbolRequest = SaveSymbolRequest | LoadSymbolRequest;
 export type SymbolResponse = SaveSymbolResponse | LoadSymbolResponse;
 
@@ -23,14 +29,14 @@ export function createSaveSymbolRequest(
 export function createSaveSymbolCompleteResponse(
   correlationId: string
 ): SaveSymbolResponse {
-  return createCompleteResponse("saveSymbol", correlationId);
+  return createCompleteResponse("saveSymbol", correlationId, true);
 }
 
 export function createSaveSymbolErrorResponse(
   correlationId: string,
   error: unknown
 ): SaveSymbolResponse {
-  return createErrorResponse("saveSymbol", correlationId, error);
+  return createErrorResponse("saveSymbol", correlationId, error, true);
 }
 
 // -------------------------------------
@@ -50,19 +56,25 @@ export function createLoadSymbolUpdateResponse(
   correlationId: string,
   symbol: SymbolDescription
 ): LoadSymbolResponse {
-  return createUpdateResponse("loadSymbol", correlationId, symbol);
+  return createUpdateResponse("loadSymbol", correlationId, symbol, false);
+}
+
+export function createLoadSymbolCompleteResponse(
+  correlationId: string
+): LoadSymbolResponse {
+  return createCompleteResponse("loadSymbol", correlationId, false);
 }
 
 export function createLoadSymbolErrorResponse(
   correlationId: string,
   error: unknown
 ): LoadSymbolResponse {
-  return createErrorResponse("loadSymbol", correlationId, error);
+  return createErrorResponse("loadSymbol", correlationId, error, false);
 }
 
 // -----------------------------------------------------------------------------
 //
-// Protocol
+// Abstract
 //
 // -----------------------------------------------------------------------------
 
@@ -76,7 +88,16 @@ type ResponseEvent<TKind extends string, TBody = void> = {
   kind: TKind;
   correlationId: string;
   body: ObservableNotification<TBody>;
+  isVoid: IsVoid<TBody>;
 };
+
+type IsVoid<T> = T extends void ? true : false;
+
+// -------------------------------------
+//
+// Helpers
+//
+// -------------------------------------
 
 function createRequest<TKind extends string, TBody>(
   kind: TKind,
@@ -89,30 +110,42 @@ function createRequest<TKind extends string, TBody>(
 function createUpdateResponse<TKind extends string, TBody>(
   kind: TKind,
   correlationId: string,
-  body: TBody
+  body: TBody,
+  isVoid: IsVoid<TBody>
 ): ResponseEvent<TKind, TBody> {
-  return createResponse(kind, correlationId, { kind: "N", value: body });
+  return createResponse(
+    kind,
+    correlationId,
+    {
+      kind: "N",
+      value: body,
+    },
+    isVoid
+  );
 }
 
 function createCompleteResponse<TKind extends string, TBody = void>(
   kind: TKind,
-  correlationId: string
+  correlationId: string,
+  isVoid: IsVoid<TBody>
 ): ResponseEvent<TKind, TBody> {
-  return createResponse(kind, correlationId, { kind: "C" });
+  return createResponse(kind, correlationId, { kind: "C" }, isVoid);
 }
 
 function createErrorResponse<TKind extends string, TBody = void>(
   kind: TKind,
   correlationId: string,
-  error: unknown
+  error: unknown,
+  isVoid: IsVoid<TBody>
 ): ResponseEvent<TKind, TBody> {
-  return createResponse(kind, correlationId, { kind: "E", error });
+  return createResponse(kind, correlationId, { kind: "E", error }, isVoid);
 }
 
 function createResponse<TKind extends string, TBody>(
   kind: TKind,
   correlationId: string,
-  body: ObservableNotification<TBody>
+  body: ObservableNotification<TBody>,
+  isVoid: IsVoid<TBody>
 ): ResponseEvent<TKind, TBody> {
-  return { kind, correlationId, body };
+  return { kind, correlationId, body, isVoid };
 }
