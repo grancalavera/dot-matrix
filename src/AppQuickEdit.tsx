@@ -5,7 +5,10 @@ import { SectionLayout } from "./layout/SectionLayout";
 import { QuickEdit } from "./symbol/QuickEdit";
 import { QuickEditToolbar } from "./symbol/QuickEditToolbar";
 import { defaultSymbolId } from "./symbol/model";
-import { changeSymbol, symbolState$ } from "./symbol/state";
+import { changeSymbol, clipboard$, symbolState$ } from "./symbol/state";
+import { merge } from "rxjs";
+
+const source$ = merge(symbolState$, clipboard$);
 
 function AppQuickEdit() {
   useEffect(() => {
@@ -15,16 +18,21 @@ function AppQuickEdit() {
   }, []);
 
   return (
-    <Subscribe source$={symbolState$}>
-      <SectionLayout
-        body={
-          <Subscribe fallback={<Fallback />}>
-            <QuickEdit />
-          </Subscribe>
-        }
-        footer={<QuickEditToolbar />}
-      />
-    </Subscribe>
+    <SectionLayout
+      body={
+        <Subscribe
+          source$={source$}
+          fallback={<Fallback message="quick edit" />}
+        >
+          <QuickEdit />
+        </Subscribe>
+      }
+      footer={
+        <Subscribe>
+          <QuickEditToolbar />
+        </Subscribe>
+      }
+    />
   );
 }
 

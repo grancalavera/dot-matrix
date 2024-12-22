@@ -1,7 +1,16 @@
 import { CenterLayout } from "./CenterLayout";
 
-export const Fallback = () => (
+type FallbackProps = {
+  message?: string;
+};
+
+export const Fallback = (props: FallbackProps) => (
   <CenterLayout>
-    <p style={{ fontSize: 20 }}>⏳</p>
+    <div style={{ textAlign: "center" }}>
+      <p style={{ fontSize: 20 }}>⏳</p>
+      {props.message && (
+        <pre style={{ fontSize: 14, color: "gray" }}>{props.message}</pre>
+      )}
+    </div>
   </CenterLayout>
 );
