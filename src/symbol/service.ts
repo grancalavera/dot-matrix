@@ -1,7 +1,6 @@
 import { createSignal } from "@react-rxjs/utils";
-import memoize from "lodash/memoize";
 import { nanoid } from "nanoid";
-import { concat, filter, from, Observable, switchMap } from "rxjs";
+import { concat, filter, from, Observable, switchMap, tap } from "rxjs";
 import { SymbolDescription, symbols } from "./model";
 import * as symbolWorkerClient from "./symbol-worker-client";
 
@@ -25,7 +24,7 @@ channel.onmessage = ({ data }: MessageEvent<ServiceMessage>) => {
 
 const [invalidate$, invalidate] = createSignal<string>();
 
-export const symbol$ = memoize((id: string): Observable<SymbolDescription> => {
+export const symbol$ = (id: string): Observable<SymbolDescription> => {
   const load$ = from(symbolWorkerClient.loadSymbol(id));
 
   const reload$ = invalidate$.pipe(
@@ -34,7 +33,7 @@ export const symbol$ = memoize((id: string): Observable<SymbolDescription> => {
   );
 
   return concat(load$, reload$);
-});
+};
 
 export const saveSymbol = async ({
   id,

@@ -1,3 +1,5 @@
+import { isEqual } from "lodash";
+
 // prettier-ignore
 export const symbols = [
   "1", "2", "3", "4", "5", "6",
@@ -66,17 +68,8 @@ export const defaultSymbolDescription = (
   data: emptySymbol(),
 });
 
-export const isModified = (
-  original: SymbolData,
-  draft: SymbolData
-): boolean => {
-  for (let i = 0; i < symbolSize; i++) {
-    if (original[i] !== draft[i]) {
-      return true;
-    }
-  }
-  return false;
-};
+export const isModified = (source: SymbolData, draft: SymbolData): boolean =>
+  !isEqual(source, draft);
 
 export const invertSymbol = (symbol: SymbolDescription): SymbolDescription => {
   symbol.data = symbol.data.map((value) => !value);
