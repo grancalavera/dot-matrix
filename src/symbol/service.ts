@@ -1,6 +1,6 @@
 import { createSignal } from "@react-rxjs/utils";
 import { nanoid } from "nanoid";
-import { concat, filter, from, Observable, switchMap, tap } from "rxjs";
+import { concat, filter, from, Observable, switchMap } from "rxjs";
 import { SymbolDescription, symbols } from "./model";
 import * as symbolWorkerClient from "./symbol-worker-client";
 

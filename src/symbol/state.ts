@@ -241,9 +241,9 @@ export const useSaveSymbolMutation = () =>
 export const [useIsSymbolDraftModified] = bind(
   symbolState$.pipe(
     switchMap((state) =>
-      symbolService
-        .symbol$(state.draft.id)
-        .pipe(map((source) => model.isModified(source.data, state.draft.data)))
+      symbol$(state.draft.id).pipe(
+        map((source) => model.isModified(source.data, state.draft.data))
+      )
     ),
     startWith(false)
   )

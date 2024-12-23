@@ -11,7 +11,7 @@ export const symbols = [
   " ", "'", "!", "?", "-", ".",
 ]
 
-export const defaultSymbolId = symbols[0] ?? "Z";
+export const defaultSymbolId = symbols[0]!;
 
 export const isKnownSymbol = (symbol: string) => symbols.includes(symbol);
 

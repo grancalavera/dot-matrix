@@ -130,6 +130,8 @@ export async function saveSymbol(symbol: SymbolDescription): Promise<void> {
     }
 
     if (data.body.kind === "C") {
+      response = data.isVoid ? undefined : response;
+
       if (response === empty) {
         reject(new Error("No value received"));
         return;
