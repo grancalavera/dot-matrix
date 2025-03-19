@@ -3,7 +3,7 @@ import {
   createLoadSymbolRequest,
   createSaveSymbolRequest,
   SymbolResponse,
-} from "./symbol-protocol";
+} from "./symbol-protocol-v2";
 
 const worker = new SharedWorker(
   new URL("./symbol-worker.ts", import.meta.url),

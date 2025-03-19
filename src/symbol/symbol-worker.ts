@@ -8,7 +8,7 @@ import {
   createSaveSymbolErrorResponse,
   SymbolRequest,
   SymbolResponse,
-} from "./symbol-protocol";
+} from "./symbol-protocol-v2";
 import { emptySymbol, SymbolData, SymbolDescription } from "./model";
 import { defaultSymbols } from "./default-symbols";
 
