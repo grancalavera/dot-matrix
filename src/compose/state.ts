@@ -17,7 +17,7 @@ import {
   takeUntil,
 } from "rxjs";
 import { assertNever } from "../lib/assertNever";
-import { symbolChanged$ } from "../symbol/state";
+import { symbol$, symbolChanged$ } from "../symbol/state";
 import {
   advancePlayHead,
   bufferFromSymbolDescriptions,
@@ -29,7 +29,6 @@ import {
   screenFrequency,
   screenPixelValue,
 } from "./model";
-import * as symbolService from "../symbol/service";
 
 const [setMessage$, setMessage] = createSignal<string>();
 const [clear$, clearMessage] = createSignal();
@@ -39,12 +38,12 @@ const [rewind$, rewindMessage] = createSignal();
 const [invert$, invertMessage] = createSignal();
 
 export {
-  setMessage,
   clearMessage,
-  playMessage,
-  pauseMessage,
-  rewindMessage,
   invertMessage,
+  pauseMessage,
+  playMessage,
+  rewindMessage,
+  setMessage,
 };
 
 export const [useMessage, message$] = bind(
@@ -117,7 +116,7 @@ export const buffer$ = state(
         ? of([])
         : forkJoin(
             bufferSymbols(message).map((symbol) =>
-              symbolService.symbol$(symbol).pipe(first())
+              symbol$(symbol).pipe(first())
             )
           ).pipe(first())
     ),

@@ -5,8 +5,7 @@ import { startWith } from "rxjs";
 export type Section = "design" | "compose";
 const defaultSection: Section = "design";
 
-const [section$, changeSection] = createSignal<Section>();
-export { changeSection };
+export const [section$, changeSection] = createSignal<Section>();
 
 export const [useSelectedSection] = bind(
   section$.pipe(startWith(defaultSection))

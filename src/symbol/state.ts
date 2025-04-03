@@ -57,6 +57,8 @@ export {
   toggleSymbolPixel,
 };
 
+export const symbol$ = state(symbolService.symbol$);
+
 export const clipboard$: StateObservable<ClipboardState> = state(
   copy$.pipe(
     switchMap(() => symbolState$.pipe(first())),
@@ -67,7 +69,7 @@ export const clipboard$: StateObservable<ClipboardState> = state(
 
 export const symbolState$: StateObservable<SymbolState> = state(
   changeSymbol$.pipe(
-    switchMap((id) => symbolService.symbol$(id)),
+    switchMap((id) => symbol$(id)),
     switchMap((symbol) => {
       const initialState: SymbolState = {
         draft: symbol,
@@ -86,9 +88,7 @@ export const symbolState$: StateObservable<SymbolState> = state(
       );
 
       const signal$ = mergeWithKey({
-        reset$: reset$.pipe(
-          switchMap(() => symbolService.symbol$(symbol.id).pipe(first()))
-        ),
+        reset$: reset$.pipe(switchMap(() => symbol$(symbol.id).pipe(first()))),
         replace$: replace$.pipe(switchMap(() => clipboard$)),
         paste$: paste$.pipe(switchMap(() => clipboard$)),
         togglePixel$,
@@ -229,7 +229,7 @@ export const [useSymbolDraftPixelValue] = bind((index: number) =>
 );
 
 export const [useSymbolPixelValue] = bind((id: string, index: number) => {
-  return symbolService.symbol$(id).pipe(
+  return symbol$(id).pipe(
     map((symbol) => symbol.data[index] ?? false),
     startWith(false)
   );
@@ -241,11 +241,9 @@ export const useSaveSymbolMutation = () =>
 export const [useIsSymbolDraftModified] = bind(
   symbolState$.pipe(
     switchMap((state) =>
-      symbolService
-        .symbol$(state.draft.id)
-        .pipe(
-          map((original) => model.isModified(original.data, state.draft.data))
-        )
+      symbol$(state.draft.id).pipe(
+        map((source) => model.isModified(source.data, state.draft.data))
+      )
     ),
     startWith(false)
   )
@@ -253,13 +251,13 @@ export const [useIsSymbolDraftModified] = bind(
 
 export const [useIsSymbolDraftEmpty] = bind(
   symbolState$.pipe(
-    map((state) => [...state.draft.data.values()].every((pixel) => !pixel)),
+    map((state) => state.draft.data.every((pixel) => !pixel)),
     startWith(true)
   )
 );
 
 export const symbolChanged$ = state(
-  merge(...model.symbols.map((x) => symbolService.symbol$(x))).pipe(
+  merge(...model.symbols.map((x) => symbol$(x))).pipe(
     map((symbol) => symbol.id)
   )
 );
