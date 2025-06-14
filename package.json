@@ -19,6 +19,7 @@
     "openai": "4.76.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-router-dom": "7.6.2",
     "rxjs": "7.8.1",
     "zod": "3.24.1"
   },
@@ -27,6 +28,7 @@
     "@types/node": "22.10.2",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2",
+    "@types/react-router-dom": "5.3.3",
     "@typescript-eslint/eslint-plugin": "6.14.0",
     "@typescript-eslint/parser": "6.14.0",
     "@vitejs/plugin-react": "4.3.4",
