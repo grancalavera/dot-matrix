@@ -1,3 +1,6 @@
+import { useLocation } from "react-router-dom";
+import { Section } from "./navigation/state";
+
 export const ROUTES = {
   DESIGN: "/design",
   COMPOSE: "/compose",
@@ -18,4 +21,14 @@ export const getRouteFromSection = (section: "design" | "compose"): RoutePath =>
 
 export const getSectionFromRoute = (route: RoutePath): "design" | "compose" => {
   return route === ROUTES.DESIGN ? "design" : "compose";
+};
+
+export const useIsSectionActive = (section: Section): boolean => {
+  const location = useLocation();
+  
+  const currentSection = isValidRoute(location.pathname) 
+    ? getSectionFromRoute(location.pathname)
+    : "design";
+  
+  return currentSection === section;
 };

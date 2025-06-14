@@ -1,8 +1,8 @@
 import { Subscribe } from "@react-rxjs/core";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components";
 import { DebugButton } from "../debug/DebugButton";
-import { getSectionFromRoute, getRouteFromSection, isValidRoute } from "../routes-model";
+import { getRouteFromSection, useIsSectionActive } from "../routes-model";
 import { Section } from "./state";
 
 export const Navigation = () => (
@@ -14,14 +14,8 @@ export const Navigation = () => (
 );
 
 const NavigationButton = (props: { section: Section }) => {
-  const location = useLocation();
   const navigate = useNavigate();
-  
-  const currentSection = isValidRoute(location.pathname) 
-    ? getSectionFromRoute(location.pathname)
-    : "design";
-  
-  const isActive = currentSection === props.section;
+  const isActive = useIsSectionActive(props.section);
   
   const handleClick = () => {
     const route = getRouteFromSection(props.section);
