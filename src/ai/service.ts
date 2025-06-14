@@ -1,9 +1,9 @@
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { fromBinaryString } from "../symbol/mapper";
 import { symbolCols, symbolRows, transposeIndex } from "../symbol/model";
 
-export const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+export const anthropic = new Anthropic({
+  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
   dangerouslyAllowBrowser: true,
 });
 
@@ -32,22 +32,26 @@ export const predict = async (char: string) => {
     throw new Error(`Invalid input: ${char}`);
   }
 
-  const completion = await openai.chat.completions.create({
+  const completion = await anthropic.messages.create({
+    model: "claude-3-5-sonnet-latest",
+    max_tokens: 1024,
+    system: prompt,
     messages: [
-      { role: "system", content: prompt },
       { role: "user", content: char },
     ],
-    model: "gpt-4o",
-    temperature: 1.1,
   });
 
-  const result = completion.choices[0]?.message.content;
+  const result = completion.content[0];
 
-  if (typeof result !== "string") {
-    throw new Error(`Invalid output: ${result}`);
+  if (!result) {
+    throw new Error("No content in response");
   }
 
-  const sanitized = sanitize(result);
+  if (result.type !== "text") {
+    throw new Error(`Invalid output type: ${result.type}`);
+  }
+
+  const sanitized = sanitize(result.text);
   const transposed = transpose(sanitized);
 
   return fromBinaryString(char, transposed);
