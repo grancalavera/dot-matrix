@@ -1,25 +1,28 @@
 import { Subscribe } from "@react-rxjs/core";
 import { useEffect } from "react";
+import { Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
 import { Compose } from "./Compose";
 import { Design } from "./Design";
-import { useSelectedSection } from "./navigation/state";
 import { defaultSymbolId } from "./symbol/model";
 import { changeSymbol, clipboard$, symbolState$ } from "./symbol/state";
 import { merge } from "rxjs";
+import { ROUTES, DEFAULT_ROUTE } from "./routes-model";
 
 const source$ = merge(symbolState$, clipboard$);
 
 export const Routes = () => {
-  const section = useSelectedSection();
-
   useEffect(() => {
     changeSymbol(defaultSymbolId);
   }, []);
 
   return (
     <Subscribe source$={source$}>
-      {section === "design" && <Design />}
-      {section === "compose" && <Compose />}
+      <RouterRoutes>
+        <Route path={ROUTES.DESIGN} element={<Design />} />
+        <Route path={ROUTES.COMPOSE} element={<Compose />} />
+        <Route path="/" element={<Navigate to={DEFAULT_ROUTE} replace />} />
+        <Route path="*" element={<Navigate to={DEFAULT_ROUTE} replace />} />
+      </RouterRoutes>
     </Subscribe>
   );
 };
