@@ -28,9 +28,9 @@ app.post("/api/predict", async (req, res) => {
 
     // Check if API key is configured
     if (!process.env.ANTHROPIC_API_KEY) {
-      return res.status(500).json({
-        error: "AI service not configured",
-        message: "ANTHROPIC_API_KEY environment variable is not set"
+      return res.status(503).json({
+        error: "Service temporarily unavailable",
+        message: "AI prediction service is currently unavailable"
       });
     }
 
@@ -54,9 +54,21 @@ app.post("/api/predict", async (req, res) => {
     }
 
     if (error instanceof Error) {
+      // Don't expose internal error details that might reveal API key info
+      const isAuthError = error.message.toLowerCase().includes('api key') || 
+                         error.message.toLowerCase().includes('authentication') ||
+                         error.message.toLowerCase().includes('unauthorized');
+      
+      if (isAuthError) {
+        return res.status(503).json({
+          error: "Service temporarily unavailable",
+          message: "AI prediction service is currently unavailable"
+        });
+      }
+
       return res.status(500).json({
         error: "AI prediction failed",
-        message: error.message
+        message: "Failed to generate symbol prediction"
       });
     }
 
