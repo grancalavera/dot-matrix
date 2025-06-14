@@ -8,8 +8,8 @@ import { Section } from "./state";
 export const Navigation = () => (
   <Subscribe>
     <DebugButton />
-    <NavigationButton section="compose" />
     <NavigationButton section="design" />
+    <NavigationButton section="compose" />
   </Subscribe>
 );
 

@@ -15,6 +15,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm lint` - Run ESLint with strict settings
 - `pnpm typecheck` - Run TypeScript compiler without emitting files
 
+### Testing
+
+- `pnpm test` - Run end-to-end tests with Playwright
+- `pnpm test:ui` - Run tests with Playwright UI mode
+- `pnpm test:headed` - Run tests in headed mode (visible browser)
+
 ## Architecture
 
 ### Core Concept
