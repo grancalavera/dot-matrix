@@ -43,8 +43,11 @@ Content-Type: application/json
 
 1. **Environment Variables**
    ```bash
-   cp .env.example .env
-   # Edit .env and add your ANTHROPIC_API_KEY
+   # Copy and edit the environment file
+   cp .env.local .env.local.backup  # if you have an existing one
+   
+   # Edit .env.local and add your ANTHROPIC_API_KEY
+   # The file is automatically loaded by dotenv
    ```
 
 2. **Development**
@@ -60,8 +63,17 @@ Content-Type: application/json
 
 ## Environment Variables
 
+Create `.env.local` in the server directory:
+
+```env
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+PORT=3001
+```
+
 - `ANTHROPIC_API_KEY` - Required. Your Anthropic API key for Claude AI
 - `PORT` - Optional. Server port (defaults to 3001)
+
+The `.env.local` file is automatically loaded by dotenv and ignored by git for security.
 
 ## Data Format
 

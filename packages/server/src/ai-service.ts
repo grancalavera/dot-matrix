@@ -38,9 +38,7 @@ export const predict = async (char: string): Promise<SymbolData> => {
     model: "claude-3-5-sonnet-latest",
     max_tokens: 1024,
     system: prompt,
-    messages: [
-      { role: "user", content: char },
-    ],
+    messages: [{ role: "user", content: char }],
   });
 
   const result = completion.content[0];
@@ -81,6 +79,6 @@ const transposeIndex = (index: number, rows: number, cols: number): number => {
 };
 
 const fromBinaryString = (id: string, binaryString: string): SymbolData => {
-  const data = binaryString.split("").map(char => char === "1");
+  const data = binaryString.split("").map((char) => char === "1");
   return { id, data };
 };

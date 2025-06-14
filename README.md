@@ -81,7 +81,7 @@ VITE_ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ```
 
 ### Server
-Create `packages/server/.env`:
+Create `packages/server/.env.local`:
 ```env
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 PORT=3001

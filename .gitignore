@@ -29,4 +29,7 @@ dist-ssr
 /blob-report/
 /playwright/.cache/
 
+# Environment files
+.env.local
+
 scratchpad.ts
