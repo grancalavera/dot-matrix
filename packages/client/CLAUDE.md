@@ -54,9 +54,10 @@ This is a dot-matrix symbol designer and composer application. Users can:
 
 #### AI Integration
 
-- Claude Sonnet 4 integration for symbol prediction
-- Requires `VITE_ANTHROPIC_API_KEY` environment variable
-- Generates symbols from character prompts with specific pixel art constraints
+- Uses REST API service for AI symbol prediction
+- Requires `VITE_AI_SERVICE_URL` environment variable (defaults to http://localhost:3001)
+- Generates symbols from character prompts via server-side Claude integration
+- No API key needed in client (handled by server)
 
 ### File Structure
 

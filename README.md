@@ -77,7 +77,7 @@ npm run dev:server # → packages/server
 ### Client
 Create `packages/client/.env.local`:
 ```env
-VITE_ANTHROPIC_API_KEY=your_anthropic_api_key_here
+VITE_AI_SERVICE_URL=http://localhost:3001
 ```
 
 ### Server
@@ -87,14 +87,14 @@ ANTHROPIC_API_KEY=your_anthropic_api_key_here
 PORT=3001
 ```
 
-## AI Integration Options
+## AI Integration
 
-The application supports two AI integration modes:
+The application uses a server-side AI integration approach:
 
-1. **Client-Side**: Direct Claude API calls from the browser (original implementation)
-2. **Server-Side**: API calls through the REST service (new monorepo feature)
-
-Both implementations are maintained for flexibility and can be switched based on requirements.
+- **Client**: Makes HTTP requests to the REST API service
+- **Server**: Handles Claude AI integration with enhanced prompts
+- **Benefits**: No API key exposure in browser, centralized AI logic, enhanced prompts
+- **Requirements**: Server must be running for AI functionality
 
 ## Development
 
