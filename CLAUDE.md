@@ -54,8 +54,8 @@ This is a dot-matrix symbol designer and composer application. Users can:
 
 #### AI Integration
 
-- OpenAI GPT-4o integration for symbol prediction
-- Requires `VITE_OPENAI_API_KEY` environment variable
+- Claude Sonnet 4 integration for symbol prediction
+- Requires `VITE_ANTHROPIC_API_KEY` environment variable
 - Generates symbols from character prompts with specific pixel art constraints
 
 ### File Structure
