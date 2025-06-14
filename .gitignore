@@ -31,5 +31,6 @@ dist-ssr
 
 # Environment files
 .env.local
+# Note: .env and .env.example are tracked for production/templates
 
 scratchpad.ts

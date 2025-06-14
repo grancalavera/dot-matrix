@@ -74,18 +74,61 @@ npm run dev:server # → packages/server
 
 ## Environment Setup
 
-### Client
-Create `packages/client/.env.local`:
+This project uses a hierarchical environment configuration system:
+
+### Environment Files Priority (highest to lowest)
+1. **`.env.local`** - Local development overrides (ignored by git)
+2. **`.env`** - Production/shared environment variables (tracked by git)
+3. **`.env.example`** - Template with example values (tracked by git)
+
+### Client Environment (`packages/client/`)
+
+**For Development:**
+```bash
+# Copy example and customize for local development
+cp packages/client/.env.example packages/client/.env.local
+# Edit .env.local with your local settings
+```
+
+**Environment Variables:**
 ```env
+# packages/client/.env.local (for development)
 VITE_AI_SERVICE_URL=http://localhost:3001
 ```
 
-### Server
-Create `packages/server/.env.local`:
+### Server Environment (`packages/server/`)
+
+**For Development:**
+```bash
+# Copy example and customize for local development  
+cp packages/server/.env.example packages/server/.env.local
+# Edit .env.local with your actual API key
+```
+
+**Environment Variables:**
 ```env
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# packages/server/.env.local (for development)
+ANTHROPIC_API_KEY=your_actual_anthropic_api_key_here
 PORT=3001
 ```
+
+### File Structure
+```
+packages/
+├── client/
+│   ├── .env.example     # Template (tracked)
+│   ├── .env            # Production config (tracked)  
+│   └── .env.local      # Development config (ignored)
+└── server/
+    ├── .env.example    # Template (tracked)
+    ├── .env           # Production config (tracked)
+    └── .env.local     # Development config (ignored)
+```
+
+**Security Notes:**
+- `.env.local` files are git-ignored and contain sensitive data
+- `.env` files are tracked for production deployment
+- Always use `.env.local` for development with real API keys
 
 ## AI Integration
 
