@@ -63,11 +63,9 @@ export const SymbolDesignerActions = () => {
       >
         e
       </Button>
-      {import.meta.env.VITE_ANTHROPIC_API_KEY && (
-        <Button divider onClick={() => predictSymbol()} disabled={isPredicting}>
-          ai
-        </Button>
-      )}
+      <Button divider onClick={() => predictSymbol()} disabled={isPredicting}>
+        ai
+      </Button>
       <Button divider onClick={() => copySymbol()}>
         c
       </Button>
