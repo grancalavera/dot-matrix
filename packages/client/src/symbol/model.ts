@@ -1,3 +1,5 @@
+import { produce } from 'immer';
+
 // prettier-ignore
 export const symbols = [
   "1", "2", "3", "4", "5", "6",
@@ -79,13 +81,15 @@ export const isModified = (
 };
 
 export const invertSymbol = (symbol: SymbolDescription): SymbolDescription => {
-  symbol.data = symbol.data.map((value) => !value);
-  return symbol;
+  return produce(symbol, (draft) => {
+    draft.data = draft.data.map((value) => !value);
+  });
 };
 
 export const fillSymbol = (symbol: SymbolDescription): SymbolDescription => {
-  symbol.data = symbol.data.map(() => true);
-  return symbol;
+  return produce(symbol, (draft) => {
+    draft.data = draft.data.map(() => true);
+  });
 };
 
 export const clone = (data: SymbolData): SymbolData => {
@@ -99,27 +103,31 @@ export const merge = (base: SymbolData, merged: SymbolData): SymbolData => {
 export const verticalFlipSymbol = (
   symbol: SymbolDescription
 ): SymbolDescription => {
-  const data: SymbolData = [];
-  symbol.data.forEach((value, key) => {
-    const coords = colMajorIndexCoordinates(key);
-    const flippedRow = symbolRows - 1 - coords.row;
-    const index = coords.col * symbolRows + flippedRow;
-    data[index] = value;
+  return produce(symbol, (draft) => {
+    const newData: SymbolData = [];
+    symbol.data.forEach((value, key) => {
+      const coords = colMajorIndexCoordinates(key);
+      const flippedRow = symbolRows - 1 - coords.row;
+      const index = coords.col * symbolRows + flippedRow;
+      newData[index] = value;
+    });
+    draft.data = newData;
   });
-  return { ...symbol, data };
 };
 
 export const horizontalFlipSymbol = (
   symbol: SymbolDescription
 ): SymbolDescription => {
-  const data: SymbolData = [];
-  symbol.data.forEach((value, key) => {
-    const coords = colMajorIndexCoordinates(key);
-    const flippedCol = symbolCols - 1 - coords.col;
-    const index = flippedCol * symbolRows + coords.row;
-    data[index] = value;
+  return produce(symbol, (draft) => {
+    const newData: SymbolData = [];
+    symbol.data.forEach((value, key) => {
+      const coords = colMajorIndexCoordinates(key);
+      const flippedCol = symbolCols - 1 - coords.col;
+      const index = flippedCol * symbolRows + coords.row;
+      newData[index] = value;
+    });
+    draft.data = newData;
   });
-  return { ...symbol, data };
 };
 
 export const rotate180Symbol = (symbol: SymbolDescription): SymbolDescription =>
@@ -129,7 +137,7 @@ export const togglePixel = (
   symbol: SymbolDescription,
   id: number
 ): SymbolDescription => {
-  const data: SymbolData = [...symbol.data];
-  data[id] = !data[id];
-  return { ...symbol, data };
+  return produce(symbol, (draft) => {
+    draft.data[id] = !draft.data[id];
+  });
 };
