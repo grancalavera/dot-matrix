@@ -2,19 +2,16 @@
   "name": "dot-matrix-monorepo",
   "private": true,
   "version": "0.0.0",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "dev": "npm run dev --workspace=packages/client",
-    "dev:server": "npm run dev --workspace=packages/server",
-    "dev:all": "npm run dev --workspaces",
-    "build": "npm run build --workspaces",
-    "lint": "npm run lint --workspaces",
-    "typecheck": "npm run typecheck --workspaces",
-    "test": "npm run test --workspace=packages/client",
-    "test:ui": "npm run test:ui --workspace=packages/client",
-    "test:headed": "npm run test:headed --workspace=packages/client"
+    "dev": "pnpm --filter packages/client dev",
+    "dev:server": "pnpm --filter packages/server dev",
+    "dev:all": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter packages/client test",
+    "test:ui": "pnpm --filter packages/client test:ui",
+    "test:headed": "pnpm --filter packages/client test:headed"
   },
   "devDependencies": {
     "typescript": "5.7.2"

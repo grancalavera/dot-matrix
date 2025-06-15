@@ -95,6 +95,8 @@ export const predict = async (char: string): Promise<SymbolData> => {
 
   const result = completion.content[0];
 
+  console.log({ result });
+
   if (!result) {
     throw new Error("No content in response");
   }
