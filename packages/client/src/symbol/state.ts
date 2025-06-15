@@ -9,9 +9,11 @@ import {
   map,
   merge,
   of,
+  retry,
   scan,
   startWith,
   switchMap,
+  timer,
 } from "rxjs";
 import * as aiService from "../ai/service";
 import { assertNever } from "../lib/assertNever";
@@ -261,5 +263,23 @@ export const [useIsSymbolDraftEmpty] = bind(
 export const symbolChanged$ = state(
   merge(...model.symbols.map((x) => symbolService.symbol$(x))).pipe(
     map((symbol) => symbol.id)
+  )
+);
+
+export const [useIsAiAvailable] = bind(
+  defer(() => from(aiService.healthCheck())).pipe(
+    retry({
+      count: 10,
+      delay: (error: unknown, retryCount) => {
+        const retryTime = Math.pow(2, retryCount);
+        console.warn(
+          `AI service health check failed, retrying in ${retryTime} seconds...`,
+          error
+        );
+        return timer(retryTime * 1000);
+      },
+    }),
+    catchError(() => of(false)),
+    startWith(false)
   )
 );

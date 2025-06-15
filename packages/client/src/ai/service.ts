@@ -1,7 +1,23 @@
-import { z } from 'zod';
-import type { SymbolDescription } from '../symbol/model.js';
+import { z } from "zod";
+import type { SymbolDescription } from "../symbol/model.js";
 
-const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:3001';
+const AI_SERVICE_URL =
+  import.meta.env.VITE_AI_SERVICE_URL || "http://localhost:3001";
+
+export const healthCheck = async (): Promise<boolean> => {
+  const response = await fetch(`${AI_SERVICE_URL}/health`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Health check failed: ${response.statusText}`);
+  }
+
+  return response.ok;
+};
 
 // Zod schemas for API response validation
 const SymbolDataSchema = z.object({
@@ -30,9 +46,9 @@ export const predict = async (char: string): Promise<SymbolDescription> => {
 
   try {
     const response = await fetch(`${AI_SERVICE_URL}/api/predict`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ character: char }),
     });
@@ -41,7 +57,7 @@ export const predict = async (char: string): Promise<SymbolDescription> => {
       try {
         const errorData = await response.json();
         const errorParseResult = ApiErrorSchema.safeParse(errorData);
-        
+
         if (errorParseResult.success) {
           const error: ApiError = errorParseResult.data;
           throw new Error(error.message || error.error);
@@ -54,26 +70,27 @@ export const predict = async (char: string): Promise<SymbolDescription> => {
     }
 
     const rawData = await response.json();
-    
+
     // Validate response structure
     const parseResult = ApiResponseSchema.safeParse(rawData);
     if (!parseResult.success) {
-      console.error('API response validation failed:', parseResult.error);
-      throw new Error('Invalid response format from AI service');
+      console.error("API response validation failed:", parseResult.error);
+      throw new Error("Invalid response format from AI service");
     }
-    
+
     const data: ApiResponse = parseResult.data;
-    
+
     if (!data.success) {
-      throw new Error('AI service returned unsuccessful response');
+      throw new Error("AI service returned unsuccessful response");
     }
 
     // Return validated data with correct type
     return data.data;
-
   } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('AI service is unavailable. Please ensure the server is running.');
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new Error(
+        "AI service is unavailable. Please ensure the server is running."
+      );
     }
     throw error;
   }
