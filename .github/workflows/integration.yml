@@ -1,0 +1,52 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Start server in background
+        run: |
+          cd packages/server
+          echo "ANTHROPIC_API_KEY=test-key" > .env.local
+          echo "PORT=3001" >> .env.local
+          pnpm start &
+          sleep 5
+        env:
+          NODE_ENV: test
+
+      - name: Test server health
+        run: |
+          curl -f http://localhost:3001/health || exit 1
+
+      - name: Test client build with server URL
+        run: |
+          cd packages/client
+          echo "VITE_AI_SERVICE_URL=http://localhost:3001" > .env.local
+          pnpm build

@@ -82,13 +82,17 @@ export const isModified = (
 
 export const invertSymbol = (symbol: SymbolDescription): SymbolDescription => {
   return produce(symbol, (draft) => {
-    draft.data = draft.data.map((value) => !value);
+    draft.data.forEach((_, index) => {
+      draft.data[index] = !draft.data[index];
+    });
   });
 };
 
 export const fillSymbol = (symbol: SymbolDescription): SymbolDescription => {
   return produce(symbol, (draft) => {
-    draft.data = draft.data.map(() => true);
+    draft.data.forEach((_, index) => {
+      draft.data[index] = true;
+    });
   });
 };
 
