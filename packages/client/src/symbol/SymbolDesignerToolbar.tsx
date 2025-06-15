@@ -13,6 +13,7 @@ import {
   replaceSymbol,
   resetSymbolEdits,
   rotateSymbol,
+  useIsAiAvailable,
   useIsPredicting,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
@@ -30,6 +31,7 @@ export const SymbolDesignerActions = () => {
   const draftIsEmpty = useIsSymbolDraftEmpty();
   const draftIsModified = useIsSymbolDraftModified();
   const isPredicting = useIsPredicting();
+  const isAiAvailable = useIsAiAvailable();
 
   const [, startSaveTransition] = useTransition();
   const [, startExportTransition] = useTransition();
@@ -63,9 +65,11 @@ export const SymbolDesignerActions = () => {
       >
         e
       </Button>
-      <Button divider onClick={() => predictSymbol()} disabled={isPredicting}>
-        ai
-      </Button>
+      {isAiAvailable && (
+        <Button divider onClick={() => predictSymbol()} disabled={isPredicting}>
+          ai
+        </Button>
+      )}
       <Button divider onClick={() => copySymbol()}>
         c
       </Button>
