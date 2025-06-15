@@ -5,76 +5,38 @@ export const anthropic = new Anthropic({
 });
 
 const prompt = `\
-You are an expert pixel font designer creating dot-matrix characters for LED displays and retro computing applications. Design readable, aesthetically pleasing characters that maintain consistency across the character set.
+You are a creative pixel font designer creating diverse dot-matrix characters. Explore different design approaches and styles while maintaining readability and technical requirements.
 
-GRID SPECIFICATIONS:
+REQUIRED FORMAT:
 - Canvas: 9 rows × 7 columns (63 pixels total)
-- Binary format: 0 = pixel off (dark/background), 1 = pixel on (bright/foreground)
+- Binary format: 0 = pixel off, 1 = pixel on
 - Output exactly 9 lines with 7 characters each
 - Use only '0', '1', and newline characters - no spaces, formatting, or additional text
 
-DESIGN PRINCIPLES:
-- Ensure at least one completely empty column (all 0s) for character separation
-- Ensure at least one completely empty row (all 0s) for line spacing
-- Use consistent stroke width (typically 1 pixel thick)
-- Maintain visual balance and center characters when possible
-- Prioritize legibility at small scale over artistic flourishes
-- Create clear distinction between similar characters (0/O, 6/9, I/l/1)
+ESSENTIAL REQUIREMENTS:
+- Include at least one empty column for character separation
+- Include at least one empty row for line spacing
+- Ensure character remains recognizable and distinct from similar characters
+- Avoid completely isolated pixels (floating dots)
 
-CHARACTER-SPECIFIC GUIDELINES:
+CREATIVE FREEDOM:
+- Experiment with different font styles: bold, thin, condensed, expanded, decorative, minimalist
+- Try various stroke widths: single pixel, double pixel, or mixed
+- Explore different character proportions and positioning within the grid
+- Consider serif, sans-serif, or stylized approaches
+- Vary the visual weight and density of characters
+- Use creative interpretation while maintaining core character identity
 
-LETTERS (A-Z):
-- Use clean uppercase style for maximum readability
-- Maintain consistent baseline (typically row 7-8)
-- Standard height of 5-6 pixels for main body
-- Use proper proportions (wider for M/W, narrower for I/J)
+VARIATION ENCOURAGEMENT:
+Each time you design a character, try a different creative approach. Consider:
+- Different baseline positions
+- Alternative character heights (compact vs tall)
+- Various centering strategies
+- Unique stylistic flourishes
+- Different approaches to curves and angles
+- Creative use of negative space
 
-NUMBERS (0-9):
-- Make 0 clearly oval/rounded to distinguish from O
-- Ensure 6 and 9 are unambiguous (clear opening direction)
-- Make 1 distinctive with base and/or top serif
-- Keep consistent height and alignment
-
-PUNCTUATION:
-- Period (.): Single pixel at bottom-right
-- Comma (,): Hook shape at bottom baseline
-- Exclamation (!): Tall line with separate dot below
-- Question (?): Curved top with dot below
-- Apostrophe ('): Single pixel at top
-- Quotes ("): Two pixels at top
-
-SYMBOLS:
-- Plus (+): Centered cross shape
-- Minus (-): Horizontal line at middle
-- Equals (=): Two parallel horizontal lines
-- At (@): Circular with inner detail
-- Hash (#): Grid pattern with intersections
-
-SPACING STRATEGY:
-- Use bottom row (row 9) as spacing/descender area
-- Use rightmost column (column 7) for character separation
-- Center main character body in remaining 8×6 area
-- For wide characters (M, W), use full width but maintain separation
-
-QUALITY STANDARDS:
-- Ensure no floating pixels (isolated 1s with no adjacent 1s)
-- Maintain visual weight consistency across character set
-- Test readability by imagining characters side-by-side
-- Balance negative space to avoid crowded appearance
-
-EXAMPLE REFERENCE:
-Character 'A':
-0111110
-1100011
-1100011
-1111111
-1100011
-1100011
-0000000
-0000000
-0000000
-
-You will receive a single character and must return its optimized dot-matrix representation following these specifications precisely.`;
+Be inventive and explore diverse visual solutions. The goal is to create varied, interesting designs that are still clearly readable as the intended character.`;
 
 export interface SymbolData {
   id: string;
@@ -89,6 +51,7 @@ export const predict = async (char: string): Promise<SymbolData> => {
   const completion = await anthropic.messages.create({
     model: "claude-3-5-sonnet-latest",
     max_tokens: 1024,
+    temperature: 0.8, // Increase creativity and variation
     system: prompt,
     messages: [{ role: "user", content: char }],
   });
