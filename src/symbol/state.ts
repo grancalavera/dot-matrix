@@ -1,30 +1,13 @@
 import { bind, state, StateObservable } from "@react-rxjs/core";
 import { createSignal, mergeWithKey } from "@react-rxjs/utils";
-import {
-  catchError,
-  defer,
-  first,
-  from,
-  interval,
-  map,
-  merge,
-  of,
-  retry,
-  scan,
-  startWith,
-  switchMap,
-  timer,
-} from "rxjs";
-import * as aiService from "../ai/service";
+import { first, map, merge, scan, startWith, switchMap } from "rxjs";
 import { assertNever } from "../lib/assertNever";
 import { useMutation } from "../lib/mutation";
-import { coinFlip, randomInt } from "../lib/random";
 import * as model from "./model";
 import * as symbolService from "./service";
 
 type SymbolState = {
   draft: model.SymbolDescription;
-  isPredicting: boolean;
 };
 
 type ClipboardState = model.SymbolData | undefined;
@@ -40,7 +23,6 @@ const [paste$, pasteSymbol] = createSignal();
 const [flipH$, flipSymbolH] = createSignal();
 const [flipV$, flipSymbolV] = createSignal();
 const [rotate$, rotateSymbol] = createSignal();
-const [predict$, predictSymbol] = createSignal();
 const [changeSymbol$, changeSymbol] = createSignal<string>();
 
 export {
@@ -52,7 +34,6 @@ export {
   flipSymbolV,
   invertSymbol,
   pasteSymbol,
-  predictSymbol,
   replaceSymbol,
   resetSymbolEdits,
   rotateSymbol,
@@ -73,19 +54,7 @@ export const symbolState$: StateObservable<SymbolState> = state(
     switchMap((symbol) => {
       const initialState: SymbolState = {
         draft: symbol,
-        isPredicting: false,
       };
-
-      const predictionResult$ = predict$.pipe(
-        switchMap(() =>
-          from(aiService.predict(symbol.id)).pipe(
-            catchError((error) => {
-              console.warn("prediction failed:", { symbol: symbol, error });
-              return of(symbol);
-            })
-          )
-        )
-      );
 
       const signal$ = mergeWithKey({
         reset$: reset$.pipe(
@@ -100,17 +69,11 @@ export const symbolState$: StateObservable<SymbolState> = state(
         flipH$,
         flipV$,
         rotate$,
-        predict$,
-        predictionResult$,
       });
 
       return signal$.pipe(
         scan((current, signal) => {
           const draft = current.draft;
-
-          if (signal.type !== "predictionResult$" && current.isPredicting) {
-            return current;
-          }
 
           switch (signal.type) {
             case "togglePixel$": {
@@ -168,12 +131,6 @@ export const symbolState$: StateObservable<SymbolState> = state(
             case "rotate$": {
               return { ...current, draft: model.rotate180Symbol(draft) };
             }
-            case "predict$": {
-              return { ...current, isPredicting: true };
-            }
-            case "predictionResult$": {
-              return { ...current, draft: signal.payload, isPredicting: false };
-            }
             case "reset$": {
               return { ...current, draft: signal.payload };
             }
@@ -195,13 +152,6 @@ export const [useSymbolDraft, symbolDraft$] = bind(
   )
 );
 
-export const [useIsPredicting, isPredicting$] = bind(
-  symbolState$.pipe(
-    map((state) => state.isPredicting),
-    startWith(false)
-  )
-);
-
 export const [useIsSymbolSelected] = bind((id: string) =>
   symbolState$.pipe(map((state) => state.draft.id === id))
 );
@@ -211,23 +161,7 @@ export const [useSelectedSymbolId] = bind(
 );
 
 export const [useSymbolDraftPixelValue] = bind((index: number) =>
-  defer(() => {
-    const random = () => coinFlip(0.3);
-
-    const randomValue$ = interval(randomInt(100, 500)).pipe(
-      map(random),
-      startWith(random())
-    );
-
-    const actualValue$ = symbolState$.pipe(
-      map((state) => state.draft.data[index] ?? false)
-    );
-
-    return isPredicting$.pipe(
-      startWith(false),
-      switchMap((isPredicting) => (isPredicting ? randomValue$ : actualValue$))
-    );
-  })
+  symbolState$.pipe(map((state) => state.draft.data[index] ?? false))
 );
 
 export const [useSymbolPixelValue] = bind((id: string, index: number) => {
@@ -263,23 +197,5 @@ export const [useIsSymbolDraftEmpty] = bind(
 export const symbolChanged$ = state(
   merge(...model.symbols.map((x) => symbolService.symbol$(x))).pipe(
     map((symbol) => symbol.id)
-  )
-);
-
-export const [useIsAiAvailable] = bind(
-  defer(() => from(aiService.healthCheck())).pipe(
-    retry({
-      count: 10,
-      delay: (error: unknown, retryCount) => {
-        const retryTime = Math.pow(2, retryCount);
-        console.warn(
-          `AI service health check failed, retrying in ${retryTime} seconds...`,
-          error
-        );
-        return timer(retryTime * 1000);
-      },
-    }),
-    catchError(() => of(false)),
-    startWith(false)
   )
 );

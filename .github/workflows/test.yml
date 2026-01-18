@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [20, 24]
@@ -39,13 +39,7 @@ jobs:
         run: pnpm lint
 
       - name: Run unit tests
-        run: pnpm -r test:run
+        run: pnpm test
 
-      - name: Run server type checking
-        run: pnpm --filter packages/server typecheck
-
-      - name: Run server linting  
-        run: pnpm --filter packages/server lint
-
-      - name: Build packages
+      - name: Build
         run: pnpm build
