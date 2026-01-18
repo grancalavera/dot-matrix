@@ -52,19 +52,11 @@ This is a dot-matrix symbol designer and composer application. Users can:
 - `main-quick-edit.tsx` - Simplified symbol editor for quick edits
 - Both built via Vite multi-entry configuration
 
-#### AI Integration
-
-- Uses REST API service for AI symbol prediction
-- Requires `VITE_AI_SERVICE_URL` environment variable (defaults to http://localhost:3001)
-- Generates symbols from character prompts via server-side Claude integration
-- No API key needed in client (handled by server)
-
 ### File Structure
 
 - `src/symbol/` - Symbol model, state, and services
 - `src/compose/` - Message composition and screen rendering
 - `src/layout/` - Reusable layout components
-- `src/ai/` - OpenAI integration for symbol generation
 - `src/lib/` - Utility functions and error handling
 
 ### Data Flow

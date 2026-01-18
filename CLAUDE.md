@@ -52,18 +52,11 @@ This is a dot-matrix symbol designer and composer application. Users can:
 - `main-quick-edit.tsx` - Simplified symbol editor for quick edits
 - Both built via Vite multi-entry configuration
 
-#### AI Integration
-
-- Claude Sonnet 4 integration for symbol prediction
-- Requires `VITE_ANTHROPIC_API_KEY` environment variable
-- Generates symbols from character prompts with specific pixel art constraints
-
 ### File Structure
 
 - `src/symbol/` - Symbol model, state, and services
 - `src/compose/` - Message composition and screen rendering
 - `src/layout/` - Reusable layout components
-- `src/ai/` - OpenAI integration for symbol generation
 - `src/lib/` - Utility functions and error handling
 
 ### Data Flow

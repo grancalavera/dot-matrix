@@ -9,12 +9,9 @@ import {
   flipSymbolV,
   invertSymbol,
   pasteSymbol,
-  predictSymbol,
   replaceSymbol,
   resetSymbolEdits,
   rotateSymbol,
-  useIsAiAvailable,
-  useIsPredicting,
   useIsSymbolDraftEmpty,
   useIsSymbolDraftModified,
   useSymbolDraft,
@@ -30,8 +27,6 @@ export const SymbolDesignerActions = () => {
   const draft = useSymbolDraft();
   const draftIsEmpty = useIsSymbolDraftEmpty();
   const draftIsModified = useIsSymbolDraftModified();
-  const isPredicting = useIsPredicting();
-  const isAiAvailable = useIsAiAvailable();
 
   const [, startSaveTransition] = useTransition();
   const [, startExportTransition] = useTransition();
@@ -58,18 +53,9 @@ export const SymbolDesignerActions = () => {
 
   return (
     <>
-      <Button
-        divider
-        onClick={() => handleExport()}
-        disabled={isPredicting || draftIsModified}
-      >
+      <Button divider onClick={() => handleExport()} disabled={draftIsModified}>
         e
       </Button>
-      {isAiAvailable && (
-        <Button divider onClick={() => predictSymbol()} disabled={isPredicting}>
-          ai
-        </Button>
-      )}
       <Button divider onClick={() => copySymbol()}>
         c
       </Button>
@@ -87,18 +73,10 @@ export const SymbolDesignerActions = () => {
       <Button onClick={() => clearSymbolDraft()} disabled={draftIsEmpty}>
         c
       </Button>
-      <Button
-        divider
-        onClick={() => resetSymbolEdits()}
-        disabled={!draftIsModified || isPredicting}
-      >
+      <Button divider onClick={() => resetSymbolEdits()} disabled={!draftIsModified}>
         reset
       </Button>
-      <Button
-        onClick={() => handleSave()}
-        disabled={!draftIsModified || isPredicting || !draft}
-        primary
-      >
+      <Button onClick={() => handleSave()} disabled={!draftIsModified || !draft} primary>
         save
       </Button>
     </>

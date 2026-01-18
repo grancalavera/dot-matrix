@@ -3,15 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "pnpm --filter packages/client dev",
-    "dev:server": "pnpm --filter packages/server dev",
-    "dev:all": "pnpm -r dev",
+    "dev": "pnpm --filter @dot-matrix/client dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm --filter packages/client test",
-    "test:ui": "pnpm --filter packages/client test:ui",
-    "test:headed": "pnpm --filter packages/client test:headed"
+    "test": "pnpm --filter @dot-matrix/client test",
+    "test:ui": "pnpm --filter @dot-matrix/client test:ui",
+    "test:headed": "pnpm --filter @dot-matrix/client test:headed"
   },
   "devDependencies": {
     "typescript": "5.7.2"
